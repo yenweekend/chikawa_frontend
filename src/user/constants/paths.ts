@@ -1,5 +1,6 @@
 export const PATHS = {
   HOME: "/",
+  LOGIN: "/account/login",
 };
 
 export const NAVIGATIONS = [

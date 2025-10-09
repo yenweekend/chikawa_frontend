@@ -7,7 +7,7 @@ interface MainLayoutProps {
 
 export const MainLayout = ({ children }: MainLayoutProps) => {
   return (
-    <div className="min-h-0 overflow-auto h-dvh">
+    <div className="min-h-0 overflow-auto ">
       <Header />
       <div>{children}</div>
       <Footer />
