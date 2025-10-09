@@ -44,20 +44,20 @@ export const LoginPage = () => {
   return (
     <MainLayout>
       <div className="min-h-0 flex items-center justify-center overflow-auto py-20">
-        <Card className="w-full max-w-2xl rounded-2xl px-8">
-          <CardHeader>
-            <CardTitle className="space-y-4">
-              <Typography variant={"h2"} className="text-center">
-                Login
-              </Typography>
-              <div className="flex items-center justify-center cursor-pointer">
-                <LineIcon />
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <Form {...form}>
+          <form onSubmit={handleSubmit} className="max-w-2xl w-full ">
+            <Card className="w-full max-w-2xl rounded-2xl px-8">
+              <CardHeader>
+                <CardTitle className="space-y-4">
+                  <Typography variant={"h2"} className="text-center">
+                    Login
+                  </Typography>
+                  <div className="flex items-center justify-center cursor-pointer">
+                    <LineIcon />
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3">
                 <FormField
                   control={form.control}
                   name="email"
@@ -91,18 +91,18 @@ export const LoginPage = () => {
                     />
                   )}
                 />
-              </form>
-            </Form>
-          </CardContent>
-          <CardFooter className="flex-col gap-2">
-            <Button
-              type="submit"
-              className="h-10 px-20 py-5 rounded-full bg-blue-600 text-white mx-auto"
-            >
-              Sign in
-            </Button>
-          </CardFooter>
-        </Card>
+              </CardContent>
+              <CardFooter className="flex-col gap-2">
+                <Button
+                  type="submit"
+                  className="h-10 px-20 py-5 rounded-full bg-blue-600 text-white mx-auto"
+                >
+                  Sign in
+                </Button>
+              </CardFooter>
+            </Card>
+          </form>
+        </Form>
       </div>
     </MainLayout>
   );
