@@ -10,7 +10,7 @@ export const Header = () => {
       <div className="h-10 bg-red-400 text-lg text-white font-bold flex items-center justify-center">
         あなたにぴったりの一品が見つかる
       </div>
-      <div className="w-full sticky top-0  bg-red-300 flex flex-col ">
+      <div className="w-full sticky top-0  bg-red-300 flex flex-col z-100">
         <div className="flex items-center justify-between py-5 px-20">
           <div className="basis-1/3 relative">
             <div className="absolute flex flex-col gap-2 items-center justify-center -top-5">

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 
+
 export const Footer = () => {
   return (
     <div className="pt-[50px] pb-[25px] bg-yellow-200 px-20 flex flex-col items-center">
