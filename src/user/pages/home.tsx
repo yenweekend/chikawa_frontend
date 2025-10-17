@@ -1,15 +1,66 @@
 import { MainLayout } from "@/user/layouts/main-layout";
-import React, { useRef } from "react";
-import Slider from "react-slick"; // 👈
-import ProductCard from "../components/ui/product-card";
+import { useRef } from "react";
+import Slider from "react-slick";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { ProductSection } from "@/user/features/products/product-section";
+import type { Product } from "@/user/types/products";
+
+export const products: Product[] = [
+  {
+    id: 1,
+    title: "Soft Cotton Hoodie",
+    price: 49.99,
+    imgUrl:
+      "https://chiikawamarket.jp/cdn/shop/products/000000000797_1.jpg?v=1655033586&width=168",
+    href: "/products/1",
+  },
+  {
+    id: 2,
+    title: "Wireless Noise-Cancelling Headphones",
+    price: 129.99,
+    imgUrl:
+      "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=500",
+    href: "/products/2",
+  },
+  {
+    id: 3,
+    title: "Ergonomic Office Chair",
+    price: 199.0,
+    imgUrl:
+      "https://chiikawamarket.jp/cdn/shop/products/000000000797_1.jpg?v=1655033586&width=168",
+    href: "/products/3",
+  },
+  {
+    id: 4,
+    title: "Minimal Wooden Desk Lamp",
+    price: 69.5,
+    imgUrl: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500",
+    href: "/products/4",
+  },
+  {
+    id: 5,
+    title: "Smartwatch Pro X2",
+    price: 249.99,
+    imgUrl:
+      "https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?w=500",
+    href: "/products/5",
+  },
+  {
+    id: 6,
+    title: "Ceramic Coffee Mug Set",
+    price: 24.99,
+    imgUrl:
+      "https://images.unsplash.com/photo-1517685352821-92cf88aee5a5?w=500",
+    href: "/products/6",
+  },
+];
 
 export default function HomePage() {
-const sliderRef = useRef<any>(null);
+  const sliderRef = useRef<Slider | null>(null);
 
   const sliderItems = [
     {
@@ -112,18 +163,16 @@ const sliderRef = useRef<any>(null);
   };
 
   const handlePrev = () => {
-    console.log("Prev clicked"); 
     sliderRef.current?.slickPrev();
   };
 
   const handleNext = () => {
-    console.log("Next clicked"); 
     sliderRef.current?.slickNext();
   };
 
   return (
     <MainLayout>
-      <div className="py-8 relative z-0 bg-[url('../dot.png')] bg-repeat bg-center bg-[length:20px_20px]">
+      <div className="py-8 relative bg-[length:20px_20px]">
         <Button
           size="icon"
           onClick={handlePrev}
@@ -162,105 +211,12 @@ const sliderRef = useRef<any>(null);
           ))}
         </Slider>
       </div>
-
-      <div className="bg-red-300 text-center  justify-center">
-        <div className="pt-18 text-center">
-          <p className="text-[16px]">New Products</p>
-          <p className="text-[26px] font-semibold">NEW ITEMS</p>
-        </div>
-        <div className="px-20 pt-10 grid grid-rows-3 grid-cols-4 gap-4">
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-        </div>
-        <div className="flex items-center justify-center">
-          <p className="text-xl font-semibold text-white bg-blue-400 px-15 py-3 rounded-full mt-8 mb-10">
-            View all
-          </p>
-        </div>
-      </div>
-      <div className="bg-[url('../public/dot.png')] bg-repeat bg-center bg-[length:20px_20px] text-center  justify-center">
-        <div className="pt-18 text-center">
-          <p className="text-[16px]">New Products</p>
-          <p className="text-[26px] font-semibold">NEW ITEMS</p>
-        </div>
-        <div className="px-20 pt-10 grid grid-rows-3 grid-cols-4 gap-4">
-          <div className="flex items-center justify-center border border-black rounded-2xl">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-          <div className="flex items-center justify-center">
-            <ProductCard />
-          </div>
-        </div>
-        <div className="flex items-center justify-center animate-[slideup_0.6s_ease-out_forwards]">
-          <p className="text-xl font-semibold text-white bg-blue-400 px-15 py-3 rounded-full mt-8 mb-10">
-            View all
-          </p>
-        </div>
-      </div>
+      <ProductSection
+        title="New Items"
+        description="Salge off 50%"
+        products={products}
+        viewPath="/"
+      />
     </MainLayout>
   );
 }

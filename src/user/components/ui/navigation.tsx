@@ -27,12 +27,14 @@ export const Navigation = ({ navigation }: NavigationProps) => {
                 asChild
                 className={navigationMenuTriggerStyle()}
               >
-                <Link to={item.href}>{item.title}</Link>
+                <Link to={item.href} className="!text-slate-900 ">
+                  {item.title}
+                </Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
           ) : (
             <NavigationMenuItem key={`nav-${index}`}>
-              <NavigationMenuTrigger className="!bg-none">
+              <NavigationMenuTrigger className="!bg-none ">
                 {item.title}
               </NavigationMenuTrigger>
               <NavigationMenuContent className="p-6 rounded-lg !bg-yellow-200 border-none shadow-none">

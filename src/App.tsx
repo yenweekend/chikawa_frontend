@@ -1,7 +1,10 @@
 import { Route, Routes } from "react-router-dom";
+
+import { PATHS } from "@/user/constants/paths";
+
 import HomePage from "@/user/pages/home";
 import { LoginPage } from "@/user/pages/account/login";
-import { PATHS } from "@/user/constants/paths";
+import { ProductDetail } from "@/user/pages/product/product-detail";
 import { NotFound } from "@/user/components/ui/not-found";
 
 function App() {
@@ -9,6 +12,7 @@ function App() {
     <Routes>
       <Route element={<HomePage />} path={PATHS.HOME} />
       <Route element={<LoginPage />} path={PATHS.LOGIN} />
+      <Route element={<ProductDetail  />} path={PATHS.PRODUCT_DETAIL} />
 
       <Route element={<NotFound />} path="/*"></Route>
     </Routes>
