@@ -4,52 +4,53 @@ import { formatPrice } from "@/lib/utils";
 import { Link } from "react-router-dom";
 
 interface ProductCardProps {
-  title: string;
-  price: number;
-  imgUrl: string;
-  href: string;
+  title?: string;     
+  price?: number;
+  imgUrl?: string;
+  href?: string;
   className?: string;
 }
 
 const ProductCard = ({
-  title,
+  title = "No title", 
   className,
-  price,
-  href,
-  imgUrl,
+  price = 0,
+  href = "#",
+  imgUrl = "https://via.placeholder.com/300x300?text=No+Image", 
 }: ProductCardProps) => {
   return (
-    <>
-      <div className={cn("rounded-2xl overflow-hidden p-4", className)}>
-        <div className="bg-white rounded-lg p-6 h-full flex flex-col ">
-          <div className="group">
-            <div className="flex justify-center items-center overflow-hidden">
-              <img
-                className="w-70.5 h-70.5 transition-transform duration-400 group-hover:scale-102"
-                src={imgUrl}
-                alt={title}
-              />
-            </div>
-            <div className="text-left mt-2">
-              <Link to={href}>
-                <Typography
-                  variant="h4"
-                  className="font-semibold  transition-all duration-300 group-hover:underline group-hover:opacity-50 group-hover:cursor-pointer text-justify line-clamp-5"
-                >
-                  {title}
-                </Typography>
-              </Link>
-            </div>
-          </div>
-          <div className="text-right mt-auto">
-            <Typography variant="h3">¥{formatPrice(price)}</Typography>
-            <Typography variant="muted" className="text-[13px]">
-              (tax included)
+    <div className={cn("rounded-xl  hover:cursor-pointer overflow-hidden p-4 bg-white border-black transition-all duration-300", className)}>
+      <div className="bg-white p-2 h-full flex flex-col">
+        <div className="group flex  justify-center items-center overflow-hidden rounded-lg">
+          <img
+            className="w-70.5 h-70.5 object-cover transition-transform duration-300 group-hover:scale-105"
+            src={imgUrl}
+            alt={title}
+          />
+        </div>
+
+        <div className="text-left mt-3">
+          <Link to={href}>
+            <Typography
+              variant="h4"
+              className="font-semibold text-gray-800 transition-all duration-300 hover:underline hover:opacity-70 line-clamp-2"
+            >
+              {title}
             </Typography>
-          </div>
+          </Link>
+        </div>
+
+        {/* Giá */}
+        <div className="text-right mt-auto">
+          <Typography variant="h3" className="text-gray-900">
+            ¥{formatPrice(price)}
+          </Typography>
+          <Typography variant="muted" className="text-[13px] text-gray-500">
+            (tax included)
+          </Typography>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

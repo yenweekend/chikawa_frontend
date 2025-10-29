@@ -2,6 +2,8 @@ export const PATHS = {
   HOME: "/",
   LOGIN: "/account/login",
   PRODUCT_DETAIL: "/products/:id",
+  SEARCH: "/search",
+  
 };
 
 export const NAVIGATIONS = [
