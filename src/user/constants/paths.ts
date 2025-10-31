@@ -3,7 +3,9 @@ export const PATHS = {
   LOGIN: "/account/login",
   PRODUCT_DETAIL: "/products/:id",
   SEARCH: "/search",
-  
+
+  BLOG: "/blogs/:slug",
+  BLOG_DETAIL: "/blogs/:slug/:id",
 };
 
 export const NAVIGATIONS = [

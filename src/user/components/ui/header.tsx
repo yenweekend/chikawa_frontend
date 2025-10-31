@@ -1,10 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { NAVIGATIONS } from "@/user/constants/paths";
 
 import { Navigation } from "@/user/components/ui/navigation";
 
 export const Header = () => {
+  const navigate = useNavigate();
   return (
     <>
       <div className="h-10 bg-red-400 text-lg text-white font-bold flex items-center justify-center">
@@ -17,7 +18,10 @@ export const Header = () => {
               <p className="rounded-full w-50 bg-white border border-black text-center py-1">
                 Hello! Guest
               </p>
-              <div className="w-40 ">
+              <div
+                className="w-40 cursor-pointer "
+                onClick={() => navigate("/")}
+              >
                 <img src="https://chiikawamarket.jp/cdn/shop/files/welcome_320x.png?v=16266376846941523964" />
               </div>
             </div>
@@ -31,10 +35,10 @@ export const Header = () => {
             </div>
           </div>
           <div className="basis-1/3 flex items-center gap-2 justify-end">
-            <Link className="w-14 h-14" to={"/"}>
+            <Link className="w-16 h-16" to={"/account/login"}>
               <img src="https://chiikawamarket.jp/cdn/shop/files/en_btn_login_112x.png?v=1848369783586275347" />
             </Link>
-            <Link className="w-14 h-14" to={"/"}>
+            <Link className="w-16 h-16" to={"/"}>
               <img src="https://chiikawamarket.jp/cdn/shop/files/en_btn_cart_112x.png?v=8880665500984661040" />
             </Link>
           </div>
