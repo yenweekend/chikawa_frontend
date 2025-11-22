@@ -4,7 +4,7 @@ import { formatPrice } from "@/lib/utils";
 import { Link } from "react-router-dom";
 
 interface ProductCardProps {
-  title?: string;     
+  title?: string;
   price?: number;
   imgUrl?: string;
   href?: string;
@@ -12,16 +12,21 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({
-  title = "No title", 
+  title = "No title",
   className,
   price = 0,
   href = "#",
-  imgUrl = "https://via.placeholder.com/300x300?text=No+Image", 
+  imgUrl = "https://via.placeholder.com/300x300?text=No+Image",
 }: ProductCardProps) => {
   return (
-    <div className={cn("rounded-xl  hover:cursor-pointer overflow-hidden p-4 bg-white border-black transition-all duration-300", className)}>
+    <div
+      className={cn(
+        "rounded-xl  hover:cursor-pointer overflow-hidden p-4 bg-white border-black transition-all duration-300 pb-10",
+        className
+      )}
+    >
       <div className="bg-white p-2 h-full flex flex-col">
-        <div className="group flex  justify-center items-center overflow-hidden rounded-lg">
+        <div className="group flex  justify-center items-center overflow-hidden rounded-lg h-100">
           <img
             className="w-70.5 h-70.5 object-cover transition-transform duration-300 group-hover:scale-105"
             src={imgUrl}
@@ -40,7 +45,6 @@ const ProductCard = ({
           </Link>
         </div>
 
-        {/* Giá */}
         <div className="text-right mt-auto">
           <Typography variant="h3" className="text-gray-900">
             ¥{formatPrice(price)}

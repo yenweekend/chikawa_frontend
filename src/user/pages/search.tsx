@@ -1,291 +1,264 @@
 "use client";
 
+import { Typography } from "@/components/ui/typography";
 import { MainLayout } from "@/user/layouts/main-layout";
-import FilterSidebar from "@/user/components/ui/filter"; 
-import { X } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
-import Sort from "@/user/components/ui/sort"; // 
-import ProductCard from "@/user/components/ui/product-card";
-import PaginationSection from "@/user/components/ui/pagination-section";
 
-const SortWithState = ({ sort, onSortChange }: { sort: string; onSortChange: (v: string) => void }) => {
-  return (
-    <div className="flex justify-end mt-4 w-full">
-      <div className="flex items-center space-x-2 text-gray-700 text-sm">
-        <span>Sort by:</span>
-        <select
-          value={sort}
-          onChange={(e) => onSortChange(e.target.value)}
-          className="border border-gray-300 bg-white rounded-lg px-3 py-1 text-sm outline-none focus:border-black hover:border-gray-400 transition cursor-pointer"
-        >
-          <option value="relevance">Relevance</option>
-          <option value="priceLowHigh">Price: Low to High</option>
-          <option value="priceHighLow">Price: High to Low</option>
-        </select>
-      </div>
-    </div>
-  );
-};
+import {
+  CommonFilterSheet,
+  type FilterSectionConfig,
+} from "@/user/components/ui/common-filter-sheet";
+import {
+  EMPTY_PRODUCT_FILTERS,
+  useProductFilters,
+  type FilterProducts,
+} from "@/user/hooks/use-product-filters";
+import {
+  type ProductCategory,
+  type ProductCharacter,
+} from "@/user/types/products";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { PRODUCT_STOCK_STATUS_OPTIONS } from "@/user/constants/product";
+import {
+  createFilterResetHandler,
+  createFilterSubmitHandler,
+} from "@/lib/filter";
+import { OptionFilterSection } from "@/user/components/ui/option-filter-section";
+import { CheckboxFilterSection } from "@/user/components/ui/checkbox-filter-section";
+import { Form, FormField } from "@/components/ui/form";
+import { CustomNumberInput } from "@/components/ui/custom-number-input";
+import { JapaneseYen, SquareMousePointer } from "lucide-react";
+import { useForm } from "react-hook-form";
+import {
+  filterPriceSchema,
+  type FilterPriceFormData,
+} from "@/user/schemas/base";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type z from "zod";
+import { Button } from "@/components/ui/button";
+import { getConsolidatedErrors } from "@/lib/utils";
+import { FormErrorList } from "@/components/ui/form-error-list";
+
+export const productCategories: ProductCategory[] = [
+  { slug: "electronics", count: 120 },
+  { slug: "fashion", count: 85 },
+  { slug: "home-appliances", count: 42 },
+  { slug: "gaming", count: 64 },
+  { slug: "books", count: 150 },
+];
+
+export const productCharacters: ProductCharacter[] = [
+  { slug: "lightweight", count: 30 },
+  { slug: "eco-friendly", count: 12 },
+  { slug: "premium", count: 54 },
+  { slug: "durable", count: 76 },
+  { slug: "limited-edition", count: 18 },
+];
 
 const SearchPage = () => {
+  const {
+    categoryOptions,
+    characterOptions,
+    setAppliedFilters,
+    appliedFilters,
+    applyFilters,
+    filters,
+    resetFilters,
+    removeFilter,
+  } = useProductFilters(productCategories, productCharacters);
 
-  const [tempValue, setTempValue] = useState("");
-  const [searchValue, setSearchValue] = useState("");
+  const [localFilters, setLocalFilters] =
+    useState<FilterProducts>(appliedFilters);
+  const [isDirty, setIsDirty] = useState(false);
 
-  // const [value, setValue] = useState("");
-  const [focus, setFocus] = useState(false);
+  const form = useForm<FilterPriceFormData>({
+    resolver: zodResolver(filterPriceSchema),
+    defaultValues: {
+      minPrice: undefined,
+      maxPrice: undefined,
+    },
+  });
 
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedCharacters, setSelectedCharacters] = useState<string[]>([]);
-  const [price, setPrice] = useState({ min: null as number | null, max: null as number | null });
-  const [selectedStock, setSelectedStock] = useState<"in" | "out" | null>(null);
-  const [sort, setSort] = useState("relevance");
+  function onSubmit(values: z.infer<typeof filterPriceSchema>) {
+    console.log("onSubmit", values);
+  }
 
-  const [page, setPage] = useState(1);
-  const limit = 24;
-  const [total, setTotal] = useState(0);
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const handleFilterChange = useCallback(
+    (fieldName: string, value?: FilterProducts[keyof FilterProducts]) => {
+      setLocalFilters((prev) => ({
+        ...prev,
+        [fieldName]: value,
+      }));
+      setIsDirty(true);
+    },
+    [setLocalFilters]
+  );
 
-  const tempValueRef = useRef(tempValue);
-  tempValueRef.current = tempValue;
+  const filterSections: FilterSectionConfig[] = useMemo(
+    () => [
+      {
+        key: "categories",
+        title: "Categories",
+        fieldName: "categories",
+        options: categoryOptions,
+        value: "item-1",
+        hiddenAllCheckbox: true,
+      },
+      {
+        key: "characters",
+        title: "Characters",
+        fieldName: "characters",
+        options: characterOptions,
+        value: "item-2",
+        hiddenAllCheckbox: true,
+      },
+      {
+        key: "status",
+        title: "Status",
+        type: "options",
+        fieldName: "status",
+        options: PRODUCT_STOCK_STATUS_OPTIONS,
+        value: "item-5",
+        hiddenAllCheckbox: false,
+      },
+    ],
+    [categoryOptions, characterOptions]
+  );
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+  const handleSubmit = createFilterSubmitHandler(
+    localFilters,
+    setAppliedFilters,
+    applyFilters,
+    setIsDirty
+  );
 
-    const initialSearchValueFromURL = params.get("q") || "";
-    console.log("URL params 'q':", initialSearchValueFromURL);
-
-
-    setSearchValue(initialSearchValueFromURL);
-    setTempValue(initialSearchValueFromURL);    
-    setPage(Number(params.get("page")) || 1);
-    setSort(params.get("sort") || "relevance");
-
-    const cats = params.get("categories");
-    setSelectedCategories(cats ? cats.split(",") : []);
-
-    const chars = params.get("characters");
-    setSelectedCharacters(chars ? chars.split(",") : []);
-
-    const min = params.get("minPrice");
-    const max = params.get("maxPrice");
-    setPrice({
-      min: min ? Number(min) : null,
-      max: max ? Number(max) : null,
-    });
-
-    setSelectedStock(params.get("stock") as "in" | "out" | null || null);
-  }, []);
-
-  const fetchSearchResults = async () => {
-    const params = new URLSearchParams();
-
-    if (searchValue) params.set("q", searchValue);
-    params.set("page", String(page));
-    params.set("limit", String(limit));
-    if (sort) params.set("sort", sort);
-
-    if (selectedCategories.length > 0) {
-      selectedCategories.forEach(cat => params.append("categories", cat));
-    }
-    if (selectedCharacters.length > 0) {
-      selectedCharacters.forEach(char => params.append("characters", char));
-    }
-    if (price.min !== null) params.set("minPrice", String(price.min));
-    if (price.max !== null) params.set("maxPrice", String(price.max));
-    if (selectedStock) params.set("stock", selectedStock);
-
-     const cacheBusterKey = `cb_${Date.now()}`; // Tạo tên key mới mỗi lần
-  params.set(cacheBusterKey, "1");
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `https://yvette-iridescent-buena.ngrok-free.dev/api/v1/search?${params.toString()}`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        }
-      );
-
-      if (!response.ok) throw new Error("Network error");
-      const data = await response.json();
-
-      setProducts(data.results || []);
-      setTotal(data.total || 0);
-    } catch (err) {
-      console.error("Fetch error:", err);
-      setProducts([]);
-      setTotal(0);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleReset = createFilterResetHandler(
+    EMPTY_PRODUCT_FILTERS,
+    setLocalFilters,
+    setIsDirty,
+    resetFilters
+  );
 
   useEffect(() => {
-    if (page >= 1) {
-      fetchSearchResults();
-    }
-  }, [searchValue, page, selectedCategories, selectedCharacters, price, selectedStock, sort]);
+    setLocalFilters(appliedFilters);
+  }, [appliedFilters]);
 
-  useEffect(() => {
-
-    const params = new URLSearchParams();
-
-    if (searchValue) params.set("q", searchValue);
-    params.set("options[prefix]", "last");
-    if (page > 1) params.set("page", String(page));
-    if (sort !== "relevance") params.set("sort", sort);
-
-    if (selectedCategories.length > 0) params.set("categories", selectedCategories.join(","));
-    if (selectedCharacters.length > 0) params.set("characters", selectedCharacters.join(","));
-    if (price.min !== null) params.set("minPrice", String(price.min));
-    if (price.max !== null) params.set("maxPrice", String(price.max));
-    if (selectedStock) params.set("stock", selectedStock);
-
-    const newURL = `${window.location.pathname}?${params.toString()}`;
-    window.history.replaceState(null, "", newURL);
-  }, [searchValue, page, selectedCategories, selectedCharacters, price, selectedStock, sort]);
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [page]);
-
-  const handleSearch = () => {
-    setSearchValue(tempValueRef.current)
-    setPage(1); 
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") handleSearch();
-  };
-
-  const clearSearch = () => {
-    setTempValue("");
-    setSearchValue("");
-    setPage(1);
-  };
-
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
+  const priceErrors = getConsolidatedErrors(form.formState.errors, [
+    "maxPrice",
+  ]);
 
   return (
     <MainLayout className="mx-auto max-w-7xl w-[90%]">
-      <div>
-        <p className="my-10 text-center text-2xl font-semibold">Search results</p>
-
-        <div className="relative w-full max-w-3xl mx-auto bg-white">
-          <input
-            type="text"
-            value={tempValue}
-            onChange={(e) => setTempValue(e.target.value)}
-            onFocus={() => setFocus(true)}
-            onBlur={() => setFocus(false)}
-            onKeyDown={handleKeyDown}
-            className="w-full border-2 border-gray-300 px-4 py-3 pt-5 pb-2 text-gray-800 outline-none focus:border-black transition-colors"
-          />
-          <label
-            className={`absolute left-4 transition-all duration-200 pointer-events-none text-gray-500 ${
-              focus || tempValue ? "text-sm top-1.5 text-gray-600" : "top-3.5 text-base"
-            }`}
+      <Typography>Heading</Typography>
+      <div className="">sort order</div>
+      <div className="flex items-center">
+        <div className="w-[300px] bg-[#fff0f0] rounded-lg">
+          <CommonFilterSheet
+            filterSections={filterSections}
+            filters={filters}
+            onRemoveFilter={removeFilter}
+            onSubmit={handleSubmit}
+            onReset={handleReset}
+            isDirty={isDirty}
           >
-            Search
-          </label>
-
-          <div className="absolute right-3 top-3.5 flex items-center space-x-3">
-            {tempValue && (
-              <>
-                <button
-                  onClick={clearSearch}
-                  className="w-5 h-5 flex items-center justify-center border border-gray-300 rounded-full hover:border-black text-gray-600 hover:cursor-pointer"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-                <div className="h-5 border-l border-gray-300" />
-              </>
-            )}
-            <img
-              src="https://www.svgrepo.com/show/489791/search.svg"
-              alt="search"
-              className="w-7 h-7 cursor-pointer opacity-70 hover:opacity-100 transition"
-              onClick={handleSearch}
-            />
-          </div>
-        </div>
-
-        <SortWithState sort={sort} onSortChange={(v) => { setSort(v); setPage(1); }} />
-
-        <div className="flex items-start gap-10 mt-6">
-          <FilterSidebar
-            selectedCategories={selectedCategories}
-            onCategoryToggle={(name) => {
-              setSelectedCategories(prev =>
-                prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
-              );
-              setPage(1);
-            }}
-            selectedCharacters={selectedCharacters}
-            onCharacterToggle={(name) => {
-              setSelectedCharacters(prev =>
-                prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
-              );
-              setPage(1);
-            }}
-            price={price}
-            onPriceChange={(p) => {
-              setPrice(p);
-              setPage(1);
-            }}
-            selectedStock={selectedStock}
-            onStockChange={(v) => {
-              setSelectedStock(prev => prev === v ? null : v);
-              setPage(1);
-            }}
-            onClearAll={() => {
-              setSelectedCategories([]);
-              setSelectedCharacters([]);
-              setPrice({ min: null, max: null });
-              setSelectedStock(null);
-              setSearchValue(""); // Xóa giá trị tìm kiếm thực tế
-              setTempValue("");
-              setSort("relevance");
-              setPage(1);
-            }}
-          />
-
-          <div className="flex-1">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {loading ? (
-                <p className="col-span-full text-center text-gray-500">Đang tải...</p>
-              ) : products.length > 0 ? (
-                products.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    title={product.name || "No name"}
-                    price={product.price || 0}
-                    imgUrl={product.images?.[0]?.trim() || "https://via.placeholder.com/200"}
-                    href={`/products/${product.id || ""}`}
-                    className="border"
+            {filterSections.map((item) => {
+              if (item.type === "options") {
+                return (
+                  <OptionFilterSection
+                    key={item.key}
+                    value={item.value}
+                    title={item.title}
+                    options={item.options!}
+                    selectedValue={
+                      localFilters[
+                        item.fieldName as keyof FilterProducts
+                      ] as string
+                    }
+                    onChange={(value: string | undefined) => {
+                      handleFilterChange(item.fieldName, value);
+                    }}
                   />
-                ))
-              ) : searchValue || selectedCategories.length || selectedCharacters.length || price.min || price.max || selectedStock ? (
-                <p className="col-span-full text-center text-gray-500">Not found.</p>
-              ) : (
-                <p className="col-span-full text-center text-gray-500">Input key words to search</p>
-              )}
-            </div>
+                );
+              }
 
-            {products.length > 0 && (
-              <PaginationSection
-                total={total}
-                limit={limit}
-                currentPage={page}
-                onPageChange={handlePageChange}
-              />
-            )}
-          </div>
+              return (
+                <CheckboxFilterSection
+                  key={item.key}
+                  title={item.title}
+                  fieldName={item.fieldName}
+                  options={item.options!}
+                  value={item.value}
+                  selectedValues={
+                    (localFilters[
+                      item.fieldName as keyof FilterProducts
+                    ] as string[]) ?? []
+                  }
+                  hiddenAllCheckbox={item.hiddenAllCheckbox}
+                  onChange={(fieldName, values) => {
+                    handleFilterChange(fieldName, values);
+                  }}
+                />
+              );
+            })}
+            <div className="p-5">
+              <p className="mb-2 font-medium">Price</p>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
+                  <div className="flex items-center gap-4 ">
+                    <FormField
+                      control={form.control}
+                      name={"minPrice"}
+                      render={({ field }) => (
+                        <CustomNumberInput
+                          min={0}
+                          onChange={(value) =>
+                            field.onChange(Number(value) || 0)
+                          }
+                          prefix={
+                            <JapaneseYen className="size-4 text-slate-500" />
+                          }
+                          inputProps={{
+                            placeholder: "1",
+                            value: field.value?.toString(),
+                            className: "h-14 pl-8 text-left text-sm",
+                          }}
+                          showFormMessage={false}
+                        />
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={"maxPrice"}
+                      render={({ field }) => (
+                        <CustomNumberInput
+                          min={0}
+                          onChange={(value) =>
+                            field.onChange(Number(value) || 0)
+                          }
+                          prefix={
+                            <JapaneseYen className="size-4 text-slate-500" />
+                          }
+                          inputProps={{
+                            placeholder: "1",
+                            value: field.value?.toString(),
+                            className: "h-14 pl-8 text-left text-sm",
+                          }}
+                          showFormMessage={false}
+                        />
+                      )}
+                    />
+                    <Button
+                      type="submit"
+                      variant="outline"
+                      className="border-border h-10 rounded-xl text-black shadow-sm hover:text-black mt-2 cursor-pointer"
+                    >
+                      <SquareMousePointer />
+                    </Button>
+                  </div>
+                  <FormErrorList errors={priceErrors} />
+                </form>
+              </Form>
+            </div>
+          </CommonFilterSheet>
         </div>
       </div>
     </MainLayout>
