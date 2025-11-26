@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import { PATHS } from "@/user/constants/paths";
 
 import HomePage from "@/user/pages/home";
+import GuidePage from "@/user/pages/guide"
 import { LoginPage } from "@/user/pages/account/login";
 import { ProductDetail } from "@/user/pages/product/product-detail";
 import { BlogDetailPage } from "@/user/pages/blog/blog-detail";
@@ -19,6 +20,7 @@ function App() {
       <Route element={<SearchPage/>} path={PATHS.SEARCH}/>
       <Route element={<BlogPage />} path={PATHS.BLOG} />
       <Route element={<BlogDetailPage />} path={PATHS.BLOG_DETAIL} />
+      <Route element={<GuidePage/>} path={PATHS.GUIDE} />
 
       <Route element={<NotFound />} path="/*"></Route>
     </Routes>
