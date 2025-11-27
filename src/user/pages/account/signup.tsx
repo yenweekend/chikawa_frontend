@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { loginSchema } from "@/user/schemas/auth";
+import { signUpSchema } from "@/user/schemas/auth";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,12 +18,14 @@ import { Typography } from "@/components/ui/typography";
 import { Form } from "@/components/ui/form";
 import { FormField } from "@/components/ui/form";
 import { FormInputField } from "@/components/ui/form-input";
-import { LineIcon } from "@/user/components/ui/common-icons";
+import { LineSignUpIcon } from "@/user/components/ui/common-icons";
 
-export const LoginPage = () => {
+export const SignUpPage = () => {
   const form = useForm({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(signUpSchema),
     defaultValues: {
+      firstName: "",
+      lastName: "",
       email: "",
       password: "",
     },
@@ -57,14 +59,44 @@ export const LoginPage = () => {
                     variant={"h2"}
                     className="text-center font-medium"
                   >
-                    Login
+                    Create your account
                   </Typography>
                   <div className="flex items-center justify-center cursor-pointer">
-                    <LineIcon />
+                    <LineSignUpIcon />
                   </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
+                <FormField
+                  control={form.control}
+                  name="firstName"
+                  render={({ field }) => (
+                    <FormInputField
+                      label="First name"
+                      required
+                      inputProps={{
+                        placeholder: "Enter your first name",
+                        // disabled: isPending,
+                        ...field,
+                      }}
+                    />
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormInputField
+                      label="Last name"
+                      required
+                      inputProps={{
+                        placeholder: "Enter your last name",
+                        // disabled: isPending,
+                        ...field,
+                      }}
+                    />
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="email"
@@ -104,7 +136,7 @@ export const LoginPage = () => {
                   type="submit"
                   className="h-10 px-20 py-5 rounded-full bg-blue-600 text-white mx-auto"
                 >
-                  Sign in
+                  Create
                 </Button>
               </CardFooter>
             </Card>

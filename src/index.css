@@ -28,7 +28,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: oklch(70.4% 0.191 22.216);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -124,6 +124,22 @@ body {
   --color-sidebar-ring: var(--sidebar-ring);
   --color-red-100: #ffc2ca;
   --color-yellow-100: #fffbbe;
+
+  --shadow-focus-ring: 0px 0px 0px 2px #ffffff,
+    0px 0px 0px 4px var(--color-primary);
+  --shadow-focus-ring-error: 0px 0px 0px 2px #ffffff,
+    0px 0px 0px 4px var(--color-destructive);
+  --shadow-box: 0px 6px 24px 0px rgba(0, 0, 0, 0.1);
+  --shadow-card: 0px 4px 9px 0 rgba(44, 36, 78, 0.05);
+  --shadow-card-2: 0px 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0px 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-card-3: 0px 1px 3px 0px rgba(0, 0, 0, 0.1),
+    0px 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+
+  --spacing-bottom-actions: 84px;
+  --spacing-footer: 58px;
+  --spacing-footer-notice: 66px;
 }
 
 .dark {
@@ -178,4 +194,13 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

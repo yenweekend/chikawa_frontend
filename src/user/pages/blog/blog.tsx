@@ -1,15 +1,26 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { Card } from "@/components/ui/card";
 import { MainLayout } from "@/user/layouts/main-layout";
 import { Typography } from "@/components/ui/typography";
 import { BlogSection } from "@/user/features/blogs/blog-section";
-import { FooterPagination } from "@/components/ui/footer-pagination";
+import { Pagination } from "@/components/ui/pagination";
+import { useCallback } from "react";
 
 export const BlogPage = () => {
-  const { slug } = useParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  console.log(slug);
+  const currentPage = Number(searchParams.get("page") ?? 1);
+
+  const handlePageChange = useCallback(
+    (page: number) => {
+      const current = new URLSearchParams(searchParams.toString());
+      current.set("page", page.toString());
+      navigate(`?${current.toString()}`);
+    },
+    [navigate, searchParams]
+  );
 
   return (
     <MainLayout>
@@ -25,7 +36,11 @@ export const BlogPage = () => {
           description="Thank you very much for your continued patronage of the market more than plain.Chiikawa We would like to inform you t..."
           created_at="October 17, 2025s"
         />
-        <FooterPagination pageTotals={20} />
+        <Pagination
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          totalPages={20}
+        />
       </Card>
     </MainLayout>
   );

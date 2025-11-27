@@ -12,7 +12,7 @@ export default function HomePage() {
       <BannerSlider />
       <ProductSection
         title="New Items"
-        description="Salge off 50%"
+        description="Sale off 50%"
         products={PRODUCTS_DATA}
         viewPath="/"
       />

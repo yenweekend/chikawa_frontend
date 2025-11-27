@@ -39,7 +39,7 @@ export const ProductSection = ({
           {description}
         </Typography>
       </div>
-      <div className="px-8 flex items-stretch flex-wrap sm:max-w-[90%] mx-auto">
+      <div className="px-8 grid grid-cols-4 gap-4 sm:max-w-[90%] mx-auto">
         {products.length > 0 &&
           products.map((item) => (
             <ProductCard
@@ -48,7 +48,7 @@ export const ProductSection = ({
               price={item.price}
               imgUrl={item.imgUrl}
               href={item.href}
-              className={cn("basis-1/4 px-2", itemClassName)}
+              className={cn("basis-1/4 px-2 ", itemClassName)}
             />
           ))}
       </div>

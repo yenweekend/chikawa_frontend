@@ -182,13 +182,13 @@ export const ProductDetail = () => {
         </div>
         <ProductSection
           title="New Items"
-          description="Salge off 50%"
+          description="Sale off 50%"
           products={PRODUCTS_DATA}
           viewPath="/"
         />
         <ProductSection
           title="New Items"
-          description="Salge off 50%"
+          description="Sale off 50%"
           products={PRODUCTS_DATA}
           viewPath="/"
           className="bg-yellow-100"
