@@ -31,7 +31,7 @@ export const LineIcon = () => {
         fill="#06C755"
       ></path>
       <path opacity="0.08" d="M46.2 0H44V44H46.2V0Z" fill="black"></path>
-      <text x="155" y="28" text-anchor="middle">
+      <text x="155" y="28" textAnchor="middle">
         Log in with LINE
       </text>
     </svg>
@@ -71,7 +71,7 @@ export const LineSignUpIcon = () => {
         fill="#06C755"
       ></path>
       <path opacity="0.08" d="M46.2 0H44V44H46.2V0Z" fill="black"></path>
-      <text x="155" y="28" text-anchor="middle">
+      <text x="155" y="28" textAnchor="middle">
         Sign up with LINE
       </text>
     </svg>

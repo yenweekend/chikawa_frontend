@@ -158,6 +158,7 @@ export const Chatbox = () => {
                       style={{ wordBreak: "break-word" }}
                       {...form.register("content")}
                       placeholder="Enter message..."
+                      disabled={isPending}
                     />
                   </div>
 

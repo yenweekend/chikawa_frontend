@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -19,8 +19,12 @@ import { Form } from "@/components/ui/form";
 import { FormField } from "@/components/ui/form";
 import { FormInputField } from "@/components/ui/form-input";
 import { LineSignUpIcon } from "@/user/components/ui/common-icons";
+import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/auth";
 
 export const SignUpPage = () => {
+  const [isPending, setIsPending] = useState(false);
+
   const form = useForm({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -35,9 +39,38 @@ export const SignUpPage = () => {
   const handleSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
+      setIsPending(true);
 
-      form.handleSubmit((data) => {
-        console.log(data);
+      form.handleSubmit(async (formData) => {
+        try {
+          const res = await fetch(
+            "https://fearsome-ollie-correspondently.ngrok-free.dev/api/v1/auth/register",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              credentials: "include",
+              body: JSON.stringify({
+                fullName: `${formData.firstName} ${formData.lastName}`,
+                encryptedPassword: `${formData.password}`,
+                email: `${formData.email}`,
+              }),
+            }
+          );
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            throw new Error(data.errors[0] || "Registration failed");
+          } else {
+            toast.success("Confirmation mail was send to your email account!");
+          }
+        } catch (err) {
+          toast.error(getErrorMessage(err));
+        } finally {
+          setIsPending(false);
+        }
       })(event);
     },
     [form]
@@ -76,7 +109,7 @@ export const SignUpPage = () => {
                       required
                       inputProps={{
                         placeholder: "Enter your first name",
-                        // disabled: isPending,
+                        disabled: isPending,
                         ...field,
                       }}
                     />
@@ -91,7 +124,7 @@ export const SignUpPage = () => {
                       required
                       inputProps={{
                         placeholder: "Enter your last name",
-                        // disabled: isPending,
+                        disabled: isPending,
                         ...field,
                       }}
                     />
@@ -107,7 +140,7 @@ export const SignUpPage = () => {
                       inputProps={{
                         placeholder: "name@example.com",
                         autoComplete: "email",
-                        // disabled: isPending,
+                        disabled: isPending,
                         ...field,
                       }}
                     />
@@ -124,7 +157,7 @@ export const SignUpPage = () => {
                       inputProps={{
                         placeholder: "Enter password",
                         autoComplete: "current-password",
-                        // disabled: isPending,
+                        disabled: isPending,
                         ...field,
                       }}
                     />
@@ -135,6 +168,7 @@ export const SignUpPage = () => {
                 <Button
                   type="submit"
                   className="h-10 px-20 py-5 rounded-full bg-blue-600 text-white mx-auto"
+                  disabled={isPending}
                 >
                   Create
                 </Button>

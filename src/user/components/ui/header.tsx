@@ -3,9 +3,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { NAVIGATIONS } from "@/user/constants/paths";
 
 import { Navigation } from "@/user/components/ui/navigation";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/stores/store";
 
 export const Header = () => {
   const navigate = useNavigate();
+  const user = useSelector((state: RootState) => state.auth.user);
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
+
   return (
     <>
       <div className="h-10 bg-red-400 text-lg text-white font-bold flex items-center justify-center">

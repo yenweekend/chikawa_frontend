@@ -11,6 +11,7 @@ import { BlogDetailPage } from "@/user/pages/blog/blog-detail";
 import { BlogPage } from "@/user/pages/blog/blog";
 import { NotFound } from "@/user/components/ui/not-found";
 import SearchPage from "@/user/pages/search";
+import LineCallback from "@/user/pages/account/line-callback";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
       <Route element={<BlogPage />} path={PATHS.BLOG} />
       <Route element={<BlogDetailPage />} path={PATHS.BLOG_DETAIL} />
       <Route element={<GuidePage/>} path={PATHS.GUIDE} />
+      <Route path="/line/callback" element={<LineCallback />} />
 
       <Route element={<NotFound />} path="/*"></Route>
     </Routes>

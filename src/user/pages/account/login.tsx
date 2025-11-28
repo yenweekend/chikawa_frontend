@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -19,8 +19,15 @@ import { Form } from "@/components/ui/form";
 import { FormField } from "@/components/ui/form";
 import { FormInputField } from "@/components/ui/form-input";
 import { LineIcon } from "@/user/components/ui/common-icons";
+import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/auth";
+import { useDispatch } from "react-redux";
+import { set } from "@/stores/slices/auth-slice";
 
 export const LoginPage = () => {
+  const dispatch = useDispatch();
+
+  const [isPending, setIsPending] = useState(false);
   const form = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -30,16 +37,77 @@ export const LoginPage = () => {
     mode: "onChange",
   });
 
+  const LINE_CHANNEL_ID = "2008514826";
+  const REDIRECT_URI = "http://localhost:5173/line/callback";
+  const STATE = "login";
+
+  const lineUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${LINE_CHANNEL_ID}&redirect_uri=${encodeURIComponent(
+    REDIRECT_URI
+  )}&state=${STATE}&scope=profile%20openid%20email`;
+
   const handleSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
+      setIsPending(true);
 
-      form.handleSubmit((data) => {
-        console.log(data);
+      form.handleSubmit(async (formData) => {
+        const { email, password } = formData;
+        try {
+          const res = await fetch(
+            "https://fearsome-ollie-correspondently.ngrok-free.dev/api/v1/auth/login",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                // "ngrok-skip-browser-warning": "true",
+              },
+              body: JSON.stringify({
+                email,
+                password,
+              }),
+              credentials: "include",
+            }
+          );
+
+          const token = res.headers.get("Authorization");
+          const data = await res.json();
+
+          if (!res.ok) {
+            throw new Error(data.error || "Login failed");
+          }
+
+          console.log(token);
+          console.log(data);
+
+          if (data.result && token) {
+            console.log(data);
+
+            dispatch(
+              set({
+                ...data.result,
+                isAuthenticated: true,
+              })
+            );
+            window.location.href = "/";
+          } else {
+            throw new Error("Missing user or token in response");
+          }
+        } catch (err) {
+          toast.error(getErrorMessage(err));
+        } finally {
+          setIsPending(false);
+        }
       })(event);
     },
-    [form]
+    [dispatch, form]
   );
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const message = params.get("message");
+
+    if (message) toast.success(message);
+  }, []);
 
   return (
     <MainLayout>
@@ -59,7 +127,12 @@ export const LoginPage = () => {
                   >
                     Login
                   </Typography>
-                  <div className="flex items-center justify-center cursor-pointer">
+                  <div
+                    className="flex items-center justify-center cursor-pointer"
+                    onClick={() => {
+                      window.open(lineUrl, "_blank");
+                    }}
+                  >
                     <LineIcon />
                   </div>
                 </CardTitle>
@@ -75,7 +148,7 @@ export const LoginPage = () => {
                       inputProps={{
                         placeholder: "name@example.com",
                         autoComplete: "email",
-                        // disabled: isPending,
+                        disabled: isPending,
                         ...field,
                       }}
                     />
@@ -92,7 +165,7 @@ export const LoginPage = () => {
                       inputProps={{
                         placeholder: "Enter password",
                         autoComplete: "current-password",
-                        // disabled: isPending,
+                        disabled: isPending,
                         ...field,
                       }}
                     />
@@ -103,6 +176,7 @@ export const LoginPage = () => {
                 <Button
                   type="submit"
                   className="h-10 px-20 py-5 rounded-full bg-blue-600 text-white mx-auto"
+                  disabled={isPending}
                 >
                   Sign in
                 </Button>
