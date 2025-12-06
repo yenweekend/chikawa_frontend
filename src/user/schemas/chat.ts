@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ValidationMessages } from "@/lib/validation";
+import { ValidationMessages } from "@/lib/utils/validation";
 
 export const chatSchema = z.object({
   content: z

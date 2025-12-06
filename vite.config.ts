@@ -12,10 +12,11 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': {
-        target: 'https://yvette-iridescent-buena.ngrok-free.dev',
+      "/api": {
+        target: "https://fearsome-ollie-correspondently.ngrok-free.dev",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '/api'),
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, "/api"),
       },
     },
   },

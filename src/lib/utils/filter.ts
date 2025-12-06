@@ -44,7 +44,7 @@ export function createFilterSubmitHandler<T>(
   applyFilters: (filters: T) => void,
   setIsDirty: (open: boolean) => void
 ) {
-  console.log(localFilters);
+  // console.log(localFilters);
 
   return () => {
     setAppliedFilters(localFilters);

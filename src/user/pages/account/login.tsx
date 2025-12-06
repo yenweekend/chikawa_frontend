@@ -20,7 +20,7 @@ import { FormField } from "@/components/ui/form";
 import { FormInputField } from "@/components/ui/form-input";
 import { LineIcon } from "@/user/components/ui/common-icons";
 import { toast } from "sonner";
-import { getErrorMessage } from "@/lib/auth";
+import { getErrorMessage } from "@/lib/utils/auth";
 import { useDispatch } from "react-redux";
 import { set } from "@/stores/slices/auth-slice";
 
@@ -59,7 +59,6 @@ export const LoginPage = () => {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                // "ngrok-skip-browser-warning": "true",
               },
               body: JSON.stringify({
                 email,

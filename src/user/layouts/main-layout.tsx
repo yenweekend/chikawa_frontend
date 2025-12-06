@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/form-utils";
 
 import { Header } from "@/user/components/ui/header";
 import { Footer } from "@/user/components/ui/footer";

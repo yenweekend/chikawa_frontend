@@ -1,4 +1,4 @@
-import formatMessageText from "@/lib/chat";
+import formatMessageText from "@/lib/utils/chat";
 
 export interface MessageItem {
   id: string;

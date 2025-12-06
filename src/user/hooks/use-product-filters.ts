@@ -8,7 +8,7 @@ import {
   PRODUCT_STOCK_STATUS_OPTIONS,
   PRODUCT_FILTER_LABELS,
 } from "@/user/constants/product";
-import { createArrayParamParser, getFilterLabel } from "@/lib/filter";
+import { createArrayParamParser, getFilterLabel } from "@/lib/utils/filter";
 
 export type FilterProducts = {
   categories: string[];
@@ -207,7 +207,7 @@ export const useProductFilters = (
     updateFiltersFromParams();
   }, [updateFiltersFromParams]);
 
-  console.log(appliedFilters);
+  // console.log(appliedFilters);
 
   return {
     appliedFilters,

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/form-utils";
 import ProductCard from "@/user/components/ui/product-card";
 import { type Product } from "@/user/types/products";
 import { useNavigate } from "react-router-dom";
@@ -43,11 +43,15 @@ export const ProductSection = ({
         {products.length > 0 &&
           products.map((item) => (
             <ProductCard
-              key={item.id}
-              title={item.title}
-              price={item.price}
-              imgUrl={item.imgUrl}
-              href={item.href}
+              key={item?.id}
+              title={item?.name}
+              price={item?.price}
+              imgUrl={
+                item?.images !== undefined && item?.images?.length > 0
+                  ? item?.images[0]
+                  : ""
+              }
+              href={`/products/${item?.id}`}
               className={cn("basis-1/4 px-2 ", itemClassName)}
             />
           ))}

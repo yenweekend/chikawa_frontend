@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { VALIDATION_REGEX, ValidationMessages } from "@/lib/validation";
+import { VALIDATION_REGEX, ValidationMessages } from "@/lib/utils/validation";
 import { createEmailSchema } from "@/user/schemas/base";
 
 const passwordSchema = z

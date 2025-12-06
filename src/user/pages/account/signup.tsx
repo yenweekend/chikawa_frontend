@@ -20,7 +20,7 @@ import { FormField } from "@/components/ui/form";
 import { FormInputField } from "@/components/ui/form-input";
 import { LineSignUpIcon } from "@/user/components/ui/common-icons";
 import { toast } from "sonner";
-import { getErrorMessage } from "@/lib/auth";
+import { getErrorMessage } from "@/lib/utils/auth";
 
 export const SignUpPage = () => {
   const [isPending, setIsPending] = useState(false);

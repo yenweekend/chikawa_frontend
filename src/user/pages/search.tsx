@@ -15,13 +15,14 @@ import {
 import {
   type ProductCategory,
   type ProductCharacter,
+  type ProductSearchParams,
 } from "@/user/types/products";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PRODUCT_STOCK_STATUS_OPTIONS } from "@/user/constants/product";
 import {
   createFilterResetHandler,
   createFilterSubmitHandler,
-} from "@/lib/filter";
+} from "@/lib/utils/filter";
 import { OptionFilterSection } from "@/user/components/ui/option-filter-section";
 import { CheckboxFilterSection } from "@/user/components/ui/checkbox-filter-section";
 import { Form, FormField } from "@/components/ui/form";
@@ -35,26 +36,71 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import type z from "zod";
 import { Button } from "@/components/ui/button";
-import { getConsolidatedErrors } from "@/lib/utils";
+import { getConsolidatedErrors } from "@/lib/utils/form-utils";
 import { FormErrorList } from "@/components/ui/form-error-list";
+import { getSearchAction } from "@/actions/product";
+import { useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/utils/auth";
 
 export const productCategories: ProductCategory[] = [
-  { slug: "electronics", count: 120 },
-  { slug: "fashion", count: 85 },
+  { slug: "preorder", count: 120 },
+  { slug: "mascot", count: 85 },
   { slug: "home-appliances", count: 42 },
   { slug: "gaming", count: 64 },
   { slug: "books", count: 150 },
 ];
 
 export const productCharacters: ProductCharacter[] = [
-  { slug: "lightweight", count: 30 },
-  { slug: "eco-friendly", count: 12 },
+  { slug: "chiikawa", count: 30 },
+  { slug: "hachiware", count: 12 },
   { slug: "premium", count: 54 },
   { slug: "durable", count: 76 },
   { slug: "limited-edition", count: 18 },
 ];
 
 const SearchPage = () => {
+  const [data, setData] = useState(undefined);
+  const [isPending, setIsPending] = useState<boolean>(false);
+  const [searchParams] = useSearchParams();
+
+  const fetchSearchData = useCallback(async () => {
+    try {
+      const params: ProductSearchParams = {
+        characters: JSON.parse(searchParams.get("characters") || "[]"),
+        categories: JSON.parse(searchParams.get("categories") || "[]"),
+        minPrice: searchParams.get("minPrice")
+          ? Number(searchParams.get("minPrice"))
+          : undefined,
+        maxPrice: searchParams.get("maxPrice")
+          ? Number(searchParams.get("maxPrice"))
+          : undefined,
+        status: searchParams.get("status") || undefined,
+        page: Number(searchParams.get("page") || 1),
+        q: searchParams.get("keyword")?.trim() || undefined,
+        sortBy:
+          (searchParams.get("sortBy") as ProductSearchParams["sortBy"]) ||
+          "name",
+        sortOrder:
+          (searchParams.get("sortOrder") as ProductSearchParams["sortOrder"]) ||
+          "desc",
+      };
+
+      console.log(params);
+
+      const response = await getSearchAction(params);
+
+      if (response.data) {
+        console.log(response.data);
+      }
+    } catch (err) {
+      console.log(err);
+
+      toast.error(getErrorMessage(err));
+    } finally {
+      setIsPending(false);
+    }
+  }, [searchParams]);
   const {
     categoryOptions,
     characterOptions,
@@ -142,9 +188,15 @@ const SearchPage = () => {
     setLocalFilters(appliedFilters);
   }, [appliedFilters]);
 
+  useEffect(() => {
+    fetchSearchData();
+  }, [fetchSearchData]);
+
   const priceErrors = getConsolidatedErrors(form.formState.errors, [
     "maxPrice",
   ]);
+
+  if (isPending) return "loading...";
 
   return (
     <MainLayout className="mx-auto max-w-7xl w-[90%]">

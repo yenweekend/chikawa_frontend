@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/form-utils";
 import { Link } from "react-router-dom";
 
 import { Typography } from "@/components/ui/typography";

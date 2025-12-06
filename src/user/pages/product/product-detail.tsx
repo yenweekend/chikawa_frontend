@@ -3,42 +3,65 @@ import { PageHeader } from "@/user/components/ui/page-header";
 import FancyBoxWrapper from "@/user/features/products/fancybox";
 import { Swiper, SwiperSlide, type SwiperRef } from "swiper/react";
 import { FreeMode, Navigation, Thumbs } from "swiper/modules";
-import { useEffect, useRef, useState } from "react";
-import { formatPrice } from "@/lib/utils";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { formatPrice } from "@/lib/utils/form-utils";
 import { Card } from "@/components/ui/card";
 import { Typography } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { PRODUCTS_DATA } from "@/user/constants/fakeData";
 import { ProductSection } from "@/user/features/products/product-section";
-
-const thumbnails: { id: number; image_url: string }[] = [
-  {
-    id: 1,
-    image_url:
-      "https://chiikawamarket.jp/cdn/shop/files/4571609370727__1_rsv_bb422e65-f645-45b2-b5f9-f99d201a5201.jpg?v=1761044046&width=168",
-  },
-  {
-    id: 2,
-    image_url:
-      "https://chiikawamarket.jp/cdn/shop/files/4571609370727__1_rsv_bb422e65-f645-45b2-b5f9-f99d201a5201.jpg?v=1761044046&width=168",
-  },
-];
+import type { Product } from "@/user/types/products";
+import { useParams } from "react-router-dom";
+import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/utils/auth";
+import { getProductDetailAction } from "@/actions/product";
+import { Counter } from "@/user/components/ui/counter";
+import { DoorOpen } from "lucide-react";
 
 export const ProductDetail = () => {
+  const [quantity, setQuantity] = useState<number>(1);
   const [currentIdx, setCurrentIdx] = useState<number>(0);
-  const [images, setImages] = useState<{ id: number; image_url: string }[]>([]);
+  const [images, setImages] = useState<string[]>([]);
+  const [productDetail, setProductDetail] = useState<Product>(null);
+  const [isPending, setIsPending] = useState<boolean>(false);
+  const { id } = useParams();
 
   const swiperRef = useRef<SwiperRef | null>(null);
 
-  useEffect(() => {
-    setImages(thumbnails);
-  }, [setImages]);
+  const fetchProductDetail = useCallback(async () => {
+    try {
+      if (!id) return;
+      const response = await getProductDetailAction(Number(id));
+      if (response?.data) {
+        setProductDetail(response.data.result);
 
-  const toSlide = (number) => {
+        setImages(response.data.result.images ?? []);
+      }
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    } finally {
+      setIsPending(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    fetchProductDetail();
+  }, [fetchProductDetail, id]);
+
+  const handleQuantityChange = (newQuantity: number) => {
+    // setPlanOptionQuantity(option.id.toString(), newQuantity);
+    console.log(newQuantity);
+    setQuantity(newQuantity);
+  };
+
+  const toSlide = (number: number) => {
     setCurrentIdx(number);
 
     swiperRef.current?.swiper.slideTo(number, 400);
   };
+
+  if (isPending) return "Loading...";
 
   return (
     <>
@@ -46,9 +69,8 @@ export const ProductDetail = () => {
         <div className="mx-auto max-w-[90%] w-[90%]">
           <PageHeader
             breadcrumbs={[
-              { label: "ホーム", href: "/" },
-              { label: "全商品", href: "/" },
-              { label: "ちいかわ カレンダー2026" },
+              { label: "Home", href: "/" },
+              { label: productDetail?.name || "" },
             ]}
           />
           <FancyBoxWrapper
@@ -98,12 +120,12 @@ export const ProductDetail = () => {
                                   }}
                                 >
                                   <a
-                                    href={item.image_url}
+                                    href={item}
                                     className="h-full absolute inset-0 object-cover w-full"
                                     data-fancybox="gallery"
                                   >
                                     <img
-                                      src={item.image_url}
+                                      src={item}
                                       className={"h-full  object-cover "}
                                     />
                                   </a>
@@ -126,7 +148,7 @@ export const ProductDetail = () => {
                               onClick={() => toSlide(idx)}
                             >
                               <img
-                                src={item.image_url}
+                                src={item}
                                 alt=""
                                 className="h-full w-full object-cover"
                               />
@@ -143,19 +165,51 @@ export const ProductDetail = () => {
                   variant="h2"
                   className="line-clamp-5 text-foreground font-medium"
                 >
-                  【予約】ちいかわ まじかるちいかわ
-                  超BIG！おすわりぬいぐるみ（うさぎ）【2026年3月下旬より順次発送予定（発送延期の場合もキャンセル不可）】【通常商品と同時購入・配送希望日指定不可】【キャンペーン対象外】
+                  {productDetail?.name ?? "--"}
                 </Typography>
-                <Typography variant="muted">Gray Parka Service Inc.</Typography>
-                <Typography variant="muted">
-                  Product Number : 4571609370741
+                <Typography variant="muted" className="uppercase text-base">
+                  Vendor: {productDetail?.vendor ?? "--"}
+                </Typography>
+                <Typography variant="muted" className="uppercase opacity-75">
+                  Product Number : {productDetail?.id ?? "--"}
                 </Typography>
                 <Typography
                   variant="medium-large"
-                  className="text-3xl font-normal "
+                  className="text-3xl font-medium "
                 >
-                  ¥{formatPrice(187000)}
+                  ¥{formatPrice(productDetail?.price ?? 0)}
                 </Typography>
+                <div className="flex items-center gap-4">
+                  {productDetail?.variants &&
+                    productDetail.variants.map((variant, index) => (
+                      <div
+                        className="space-y-2 flex flex-col min-w-0 max-w-25"
+                        key={`${variant.name}-${index}`}
+                      >
+                        <div className="md:size-25 size-15 overflow-hidden flex items-center justify-center border">
+                          {variant?.img ? (
+                            <img src={variant.img} className="object-cover" />
+                          ) : (
+                            <DoorOpen className="size-16" />
+                          )}
+                        </div>
+                        <div className="w-full">
+                          <Typography variant="muted" className="truncate">
+                            {variant.name} Lorem ipsum dolor sit amet
+                            consectetur, adipisicing elit. Esse, harum.
+                          </Typography>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+                <Counter
+                  value={quantity}
+                  onChange={handleQuantityChange}
+                  min={1}
+                  max={99}
+                  label=""
+                  className="items-start mt-2 w-full"
+                />
                 <Button
                   variant="outline"
                   type="button"
@@ -164,18 +218,22 @@ export const ProductDetail = () => {
                   Add to cart
                 </Button>
                 <Typography variant="muted" className="text-base">
-                  ※Chiikawa This product is not eligible for market original
-                  ball shipment. Please be aware in advance. Size (approx.):
-                  <br />
-                  H660×W600×D350mm Weight (approx.): 1.65kg Material: Polyester,
-                  Polyurethane Manufacturing Location: China * This product
-                  photo is a sample, so it may be slightly different from the
-                  actual product. Please note.
-                  <br />
-                  ※ぬいぐるみの縫製は手作業の為、表情などに個体差がございます。不良品等でない限り、商品の返品・交換はお受けできませんのでご了承ください。
-                  * Due to the manufacturing convenience, it may differ slightly
-                  from the original character design. Please note.
+                  {productDetail?.description ?? "--"}
                 </Typography>
+                <div className="flex items-center gap-3">
+                  {productDetail?.categories &&
+                    productDetail?.categories.map((cate, index) => (
+                      <Button variant="outline" key={`category-${index}`}>
+                        {cate.name}
+                      </Button>
+                    ))}
+                  {productDetail?.characters &&
+                    productDetail?.characters.map((char, index) => (
+                      <Button variant="outline" key={`character-${index}`}>
+                        {char.name}
+                      </Button>
+                    ))}
+                </div>
               </div>
             </div>
           </Card>
@@ -185,13 +243,6 @@ export const ProductDetail = () => {
           description="Sale off 50%"
           products={PRODUCTS_DATA}
           viewPath="/"
-        />
-        <ProductSection
-          title="New Items"
-          description="Sale off 50%"
-          products={PRODUCTS_DATA}
-          viewPath="/"
-          className="bg-yellow-100"
         />
       </MainLayout>
     </>

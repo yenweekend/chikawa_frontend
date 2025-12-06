@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
-import { useMemo } from 'react';
+import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
+import { useMemo } from "react";
 
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils/form-utils";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 
 export interface PaginationProps {
   currentPage: number;
@@ -23,7 +23,7 @@ export const Pagination = ({
   className,
 }: PaginationProps) => {
   const visiblePages = useMemo(() => {
-    const pages: (number | 'ellipsis')[] = [];
+    const pages: (number | "ellipsis")[] = [];
 
     if (totalPages <= maxVisiblePages) {
       for (let i = 1; i <= totalPages; i++) {
@@ -37,21 +37,21 @@ export const Pagination = ({
       for (let i = 1; i <= 4; i++) {
         pages.push(i);
       }
-      pages.push('ellipsis');
+      pages.push("ellipsis");
       pages.push(totalPages);
     } else if (currentPage >= totalPages - 2) {
       pages.push(1);
-      pages.push('ellipsis');
+      pages.push("ellipsis");
       for (let i = totalPages - 3; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
       pages.push(1);
-      pages.push('ellipsis');
+      pages.push("ellipsis");
       for (let i = currentPage - 1; i <= currentPage + 1; i++) {
         pages.push(i);
       }
-      pages.push('ellipsis');
+      pages.push("ellipsis");
       pages.push(totalPages);
     }
 
@@ -70,8 +70,8 @@ export const Pagination = ({
     }
   };
 
-  const handlePageClick = (page: number | 'ellipsis') => {
-    if (page === 'ellipsis') return;
+  const handlePageClick = (page: number | "ellipsis") => {
+    if (page === "ellipsis") return;
 
     onPageChange(page);
   };
@@ -81,7 +81,7 @@ export const Pagination = ({
   }
 
   return (
-    <div className={cn('flex items-center justify-center gap-1', className)}>
+    <div className={cn("flex items-center justify-center gap-1", className)}>
       <Button
         type="button"
         variant="outline"
@@ -94,7 +94,7 @@ export const Pagination = ({
       </Button>
 
       {visiblePages.map((page, index) => {
-        if (page === 'ellipsis') {
+        if (page === "ellipsis") {
           return (
             <Button
               key={`ellipsis-${index}`}
@@ -113,7 +113,7 @@ export const Pagination = ({
           <Button
             key={page}
             type="button"
-            variant={currentPage === page ? 'default' : 'outline'}
+            variant={currentPage === page ? "default" : "outline"}
             size="icon"
             onClick={() => handlePageClick(page)}
             className="size-10 rounded-xl"

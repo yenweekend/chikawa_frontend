@@ -10,7 +10,7 @@ export const AppliedFiltersSection = ({
   filters,
   onRemoveFilter,
 }: AppliedFiltersSectionProps) => {
-  console.log(filters);
+  // console.log(filters);
 
   return (
     <div className="border-b-border flex flex-col gap-2.5 border-b  px-5 py-4">

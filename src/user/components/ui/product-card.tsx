@@ -1,7 +1,8 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/form-utils";
 import { Typography } from "@/components/ui/typography";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice } from "@/lib/utils/form-utils";
 import { Link } from "react-router-dom";
+import { DoorOpen } from "lucide-react";
 
 interface ProductCardProps {
   title?: string;
@@ -26,12 +27,16 @@ const ProductCard = ({
       )}
     >
       <div className="bg-white p-2 h-full flex flex-col">
-        <div className="group flex  justify-center items-center overflow-hidden rounded-lg h-100">
-          <img
-            className="w-70.5 h-70.5 object-cover transition-transform duration-300 group-hover:scale-105"
-            src={imgUrl}
-            alt={title}
-          />
+        <div className="group flex  justify-center items-center overflow-hidden rounded-lg h-100  ">
+          {imgUrl ? (
+            <img
+              className=" object-cover transition-transform duration-300 group-hover:scale-105"
+              src={imgUrl}
+              alt={title}
+            />
+          ) : (
+            <DoorOpen className="size-32" />
+          )}
         </div>
 
         <div className="text-left mt-3">

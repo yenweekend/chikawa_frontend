@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type z from "zod";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/form-utils";
 import { chatSchema, type ChatFormData } from "@/user/schemas/chat";
 
 import { Button } from "@/components/ui/button";
