@@ -10,6 +10,7 @@ import { BlogDetailPage } from "@/user/pages/blog/blog-detail";
 import { BlogPage } from "@/user/pages/blog/blog";
 import { NotFound } from "@/user/components/ui/not-found";
 import SearchPage from "@/user/pages/search";
+import { ChatbotDashboard } from "@/dashboard/chatbot";
 
 function App() {
   return (
@@ -22,6 +23,8 @@ function App() {
       <Route element={<BlogPage />} path={PATHS.BLOG} />
       <Route element={<BlogDetailPage />} path={PATHS.BLOG_DETAIL} />
 
+
+      <Route element={<ChatbotDashboard />} path="/dashboard/chatbot" />
       <Route element={<NotFound />} path="/*"></Route>
     </Routes>
   );
