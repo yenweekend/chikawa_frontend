@@ -11,6 +11,8 @@ import { BlogPage } from "@/user/pages/blog/blog";
 import { NotFound } from "@/user/components/ui/not-found";
 import SearchPage from "@/user/pages/search";
 import { ChatbotDashboard } from "@/dashboard/chatbot";
+import { User } from "@/dashboard/user";
+
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
 
 
       <Route element={<ChatbotDashboard />} path="/dashboard/chatbot" />
+      <Route element={<User />} path="/dashboard/users" />
+
       <Route element={<NotFound />} path="/*"></Route>
     </Routes>
   );

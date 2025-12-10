@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 
 // === IMPORT LAYOUT ===
-// Lưu ý: Đảm bảo đường dẫn này đúng với cấu trúc thư mục thực tế của bạn
+// Đảm bảo MainLayout đã được tạo ở file src/dashboard/layouts/main-layout.tsx
 import { MainLayout } from "./layouts/main-layout";
 
 // ===============================================
@@ -213,10 +213,10 @@ const ConversationsChart = ({ dailyStats = [], totalConversations = 0 }) => {
                 className="w-full bg-blue-100 rounded-t-md relative hover:bg-blue-200 transition-all duration-300 cursor-pointer"
                 style={{ height: displayHeight }}
               >
-                 {/* Phần màu đậm hơn ở trên cùng cột */}
-                 {item.count > 0 && (
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-blue-500 rounded-t-md"></div>
-                 )}
+                  {/* Phần màu đậm hơn ở trên cùng cột */}
+                  {item.count > 0 && (
+                     <div className="absolute top-0 left-0 w-full h-1.5 bg-blue-500 rounded-t-md"></div>
+                  )}
               </div>
             </div>
           );
@@ -244,7 +244,7 @@ const ConversationsFilterTabs = ({
   setStartDate, 
   endDate, 
   setEndDate, 
-  onSearchDate,
+  onSearchDate, 
   onRefresh 
 }) => {
   return (
@@ -318,13 +318,13 @@ const StatusTag = ({ status }) => {
   let colors = 'bg-gray-100 text-gray-700', text = 'Undefined';
   if (status === 2) { colors = 'bg-green-100 text-green-700'; text = 'Potential'; }
   else if (status === 3) { colors = 'bg-red-100 text-red-700'; text = 'Spam'; }
-  return <span className={`px-3 py-1 text-xs font-medium rounded-full ${colors}`}>{text}</span>;
+  return <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${colors}`}>{text}</span>;
 };
 
 const AnalyzeTag = ({ analyzed }) => {
   let colors = 'bg-yellow-100 text-yellow-700', text = 'Pending';
   if (analyzed === 2) { colors = 'bg-green-100 text-green-700'; text = 'Analyzed'; }
-  return <span className={`px-3 py-1 text-xs font-medium rounded-full ${colors}`}>{text}</span>;
+  return <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${colors}`}>{text}</span>;
 };
 
 const ConversationsTable = ({ 
@@ -338,9 +338,13 @@ const ConversationsTable = ({
   onPageChange,
   onItemsPerPageChange
 }) => {
+  // Thay đổi: Giảm padding của tiêu đề cột (th) và ô dữ liệu (td)
+  // th: px-6 py-3 -> px-3 py-3
+  // td: px-6 py-4 -> px-3 py-2 (Giảm chiều cao row và chiều rộng padding)
+  
   return (
     <div className="bg-white rounded-lg shadow-md mt-6 w-full overflow-hidden">
-      <div className="flex justify-between items-center p-6">
+      <div className="flex justify-between items-center p-4">
         <h2 className="text-xl font-bold text-gray-900 whitespace-nowrap">Conversations</h2>
         <div className="flex items-center space-x-2 text-sm text-gray-600">
           <span>Show:</span>
@@ -360,8 +364,8 @@ const ConversationsTable = ({
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              {['STT', 'ID', 'Customer ID', 'Status', 'Analyze', 'Date & Time', 'Actions'].map(h => (
-                <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{h}</th>
+              {['STT', 'ID', 'Customer', 'Status', 'Analyze', 'Date & Time', 'Actions'].map(h => (
+                <th key={h} className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
@@ -379,23 +383,29 @@ const ConversationsTable = ({
             )}
             {conversations.map((row, index) => (
               <tr key={row.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-600">
                   {(currentPage - 1) * itemsPerPage + index + 1}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 truncate max-w-xs">
+                <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900 truncate max-w-[120px]" title={row.id}>
                   {row.id}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-600">
                   {row.userId ? row.userId : 'Guest'}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap"><StatusTag status={row.status} /></td>
-                <td className="px-6 py-4 whitespace-nowrap"><AnalyzeTag analyzed={row.analyzed} /></td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{formatDateTime(row.createdAt)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div className="flex items-center space-x-3">
-                    <button onClick={() => onViewClick(row)} className="flex items-center text-orange-500 hover:text-orange-700"><Eye size={16} className="mr-1" /> View</button>
-                    <button onClick={() => onAnalyzeClick(row)} className="flex items-center text-green-500 hover:text-green-700"><BarChart2 size={16} className="mr-1" /> Analyze</button>
-                    <button onClick={() => onDeleteClick(row)} className="flex items-center text-red-500 hover:text-red-700"><Trash2 size={16} className="mr-1" /> Delete</button>
+                <td className="px-3 py-2 whitespace-nowrap"><StatusTag status={row.status} /></td>
+                <td className="px-3 py-2 whitespace-nowrap"><AnalyzeTag analyzed={row.analyzed} /></td>
+                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-600">{formatDateTime(row.createdAt)}</td>
+                <td className="px-3 py-2 whitespace-nowrap text-sm font-medium">
+                  <div className="flex items-center space-x-2">
+                    <button onClick={() => onViewClick(row)} className="flex items-center text-orange-500 hover:text-orange-700 bg-orange-50 p-1.5 rounded-md" title="View">
+                      <Eye size={16} /> 
+                    </button>
+                    <button onClick={() => onAnalyzeClick(row)} className="flex items-center text-green-500 hover:text-green-700 bg-green-50 p-1.5 rounded-md" title="Analyze">
+                      <BarChart2 size={16} />
+                    </button>
+                    <button onClick={() => onDeleteClick(row)} className="flex items-center text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded-md" title="Delete">
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 </td>
               </tr>
