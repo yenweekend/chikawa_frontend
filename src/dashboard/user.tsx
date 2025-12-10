@@ -23,18 +23,97 @@ import {
   Phone,
   Lock,
   User as UserIcon,
-  Save
+  Save,
 } from "lucide-react";
 
-export const User = () => {
+export const UserDashBoard = () => {
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
-  const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false); // State cho modal Edit
-  
-  // State quản lý ẩn/hiện mật khẩu (dùng chung hoặc tách riêng tùy logic, ở đây tách riêng cho UI đơn giản)
+  const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
+
+  // View details modal
+  const [isViewUserModalOpen, setIsViewUserModalOpen] = useState(false);
+  const [viewUser, setViewUser] = useState<any>(null);
+
+  // Block confirm modal
+  const [isBlockConfirmOpen, setIsBlockConfirmOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+
+  // State quản lý ẩn/hiện mật khẩu
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Stats Data
+  // Initial users (mình thêm một vài field để hiển thị chi tiết)
+  const initialUsers = [
+    {
+      id: "6",
+      username: "Nguyễn Văn Admin",
+      email: "admin01@example.com",
+      role: "ADMIN",
+      status: "TRUE",
+      joinDate: "11/08/2025 11:26 PM",
+      lastLogin: "12/08/2025 09:00 AM",
+      avatarColor: "bg-blue-500",
+      initials: "A",
+      ordersCount: 15,
+      totalSpent: 2500000
+    },
+    {
+      id: "8",
+      username: "User Two",
+      email: "user02@example.com",
+      role: "USER",
+      status: "TRUE",
+      joinDate: "11/08/2025 11:26 PM",
+      lastLogin: "11/08/2025 11:26 PM",
+      avatarColor: "bg-indigo-500",
+      initials: "U",
+      ordersCount: 3,
+      totalSpent: 450000
+    },
+    {
+      id: "9",
+      username: "Staff One",
+      email: "staff01@example.com",
+      role: "ADMIN",
+      status: "FALSE",
+      joinDate: "11/08/2025 11:26 PM",
+      lastLogin: "-",
+      avatarColor: "bg-purple-500",
+      initials: "S",
+      ordersCount: 0,
+      totalSpent: 0
+    },
+    {
+      id: "10",
+      username: "Guest User",
+      email: "guest01@example.com",
+      role: "USER",
+      status: "TRUE",
+      joinDate: "11/08/2025 11:26 PM",
+      lastLogin: "10/08/2025 08:30 PM",
+      avatarColor: "bg-pink-500",
+      initials: "G",
+      ordersCount: 1,
+      totalSpent: 150000
+    },
+    {
+      id: "11",
+      username: "Manager One",
+      email: "manager@example.com",
+      role: "ADMIN",
+      status: "TRUE",
+      joinDate: "10/08/2025 10:15 AM",
+      lastLogin: "12/08/2025 08:45 AM",
+      avatarColor: "bg-green-500",
+      initials: "M",
+      ordersCount: 8,
+      totalSpent: 950000
+    }
+  ];
+
+  const [users, setUsers] = useState(initialUsers);
+
+  // Stats Data (giữ nguyên)
   const stats = [
     {
       title: "Total Users",
@@ -74,64 +153,31 @@ export const User = () => {
     },
   ];
 
-  // User Data List
-  const users = [
-    {
-      id: "6",
-      username: "admin01",
-      email: "admin01@example.com",
-      role: "ADMIN",
-      status: "TRUE",
-      joinDate: "11/08/2025 11:26 PM",
-      lastLogin: "12/08/2025 09:00 AM",
-      avatarColor: "bg-blue-500",
-      initials: "A"
-    },
-    {
-      id: "8",
-      username: "user02",
-      email: "user02@example.com",
-      role: "USER",
-      status: "TRUE",
-      joinDate: "11/08/2025 11:26 PM",
-      lastLogin: "11/08/2025 11:26 PM",
-      avatarColor: "bg-indigo-500",
-      initials: "U"
-    },
-    {
-      id: "9",
-      username: "staff01",
-      email: "staff01@example.com",
-      role: "ADMIN",
-      status: "FALSE",
-      joinDate: "11/08/2025 11:26 PM",
-      lastLogin: "-",
-      avatarColor: "bg-purple-500",
-      initials: "S"
-    },
-    {
-      id: "10",
-      username: "guest01",
-      email: "guest01@example.com",
-      role: "USER",
-      status: "TRUE",
-      joinDate: "11/08/2025 11:26 PM",
-      lastLogin: "10/08/2025 08:30 PM",
-      avatarColor: "bg-pink-500",
-      initials: "G"
-    },
-    {
-      id: "11",
-      username: "manager01",
-      email: "manager@example.com",
-      role: "ADMIN",
-      status: "TRUE",
-      joinDate: "10/08/2025 10:15 AM",
-      lastLogin: "12/08/2025 08:45 AM",
-      avatarColor: "bg-green-500",
-      initials: "M"
+  // Hàm gọi khi xác nhận khóa tài khoản
+  const handleLockAccount = () => {
+    if (!selectedUser) {
+      setIsBlockConfirmOpen(false);
+      return;
     }
-  ];
+
+    // Cập nhật trạng thái user trong state local (ở production sẽ call API)
+    setUsers(prev => prev.map(u => u.id === selectedUser.id ? { ...u, status: "FALSE" } : u));
+
+    // Đóng modal và reset selected
+    setIsBlockConfirmOpen(false);
+    setSelectedUser(null);
+  };
+
+  // Open view modal
+  const openViewModal = (user: any) => {
+    setViewUser(user);
+    setIsViewUserModalOpen(true);
+  };
+
+  // Format tiền VNĐ đơn giản
+  const formatVND = (amount: number) => {
+    return amount.toLocaleString("vi-VN") + " VNĐ";
+  };
 
   return (
     <MainLayout>
@@ -334,16 +380,31 @@ export const User = () => {
                         <td className="px-6 py-4">
                             <div className="flex items-center justify-center gap-2">
                                 <button 
-                                  onClick={() => setIsEditUserModalOpen(true)}
+                                  onClick={() => {
+                                    setSelectedUser(user);
+                                    setIsEditUserModalOpen(true);
+                                  }}
                                   className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 hover:shadow-sm transition-all" 
                                   title="Edit"
                                 >
                                     <Edit className="w-4 h-4" />
                                 </button>
-                                <button className="p-2 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100 hover:shadow-sm transition-all" title="View Details">
+                                <button 
+                                  onClick={() => openViewModal(user)}
+                                  className="p-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 hover:shadow-sm transition-all"
+                                  title="View Details"
+                                >
                                     <Eye className="w-4 h-4" />
                                 </button>
-                                <button className="p-2 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 hover:shadow-sm transition-all" title="Block User">
+                                {/* Block - opens confirm */}
+                                <button
+                                  onClick={() => {
+                                    setSelectedUser(user);
+                                    setIsBlockConfirmOpen(true);
+                                  }}
+                                  className="p-2 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 hover:shadow-sm transition-all"
+                                  title="Block User"
+                                >
                                     <Ban className="w-4 h-4" />
                                 </button>
                             </div>
@@ -386,10 +447,10 @@ export const User = () => {
 
         {/* --- ADD USER MODAL --- */}
         {isAddUserModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/20 backdrop-blur-sm">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[85vh]">
               {/* Modal Header */}
-              <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 flex-shrink-0">
+              <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
                 <h3 className="text-lg font-bold text-gray-900">Add New User</h3>
                 <button 
                   onClick={() => setIsAddUserModalOpen(false)}
@@ -400,7 +461,7 @@ export const User = () => {
               </div>
               
               {/* Modal Body - Scrollable */}
-              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto">
+              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto bg-white">
                  {/* Full Name */}
                  <div className="col-span-2">
                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Full Name</label>
@@ -498,7 +559,7 @@ export const User = () => {
               </div>
 
               {/* Modal Footer */}
-              <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3 bg-gray-50/50 flex-shrink-0">
+              <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3 bg-white">
                 <button 
                   onClick={() => setIsAddUserModalOpen(false)}
                   className="px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium transition-all shadow-sm"
@@ -515,11 +576,11 @@ export const User = () => {
         )}
 
         {/* --- EDIT USER MODAL --- */}
-        {isEditUserModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200">
+        {isEditUserModalOpen && selectedUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/20 backdrop-blur-sm">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[85vh]">
               {/* Modal Header */}
-              <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 flex-shrink-0">
+              <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
                 <h3 className="text-lg font-bold text-gray-900">Update User</h3>
                 <button 
                   onClick={() => setIsEditUserModalOpen(false)}
@@ -530,13 +591,13 @@ export const User = () => {
               </div>
               
               {/* Modal Body - Scrollable */}
-              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto">
+              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto bg-white">
                  {/* Full Name */}
                  <div className="col-span-2">
                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Full Name</label>
                     <div className="relative">
                       <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input type="text" defaultValue="Admin User" className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
+                      <input type="text" defaultValue={selectedUser?.username || ""} className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
                     </div>
                  </div>
 
@@ -545,7 +606,7 @@ export const User = () => {
                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Email</label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input type="email" defaultValue="admin01@example.com" className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
+                      <input type="email" defaultValue={selectedUser?.email || ""} className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
                     </div>
                  </div>
 
@@ -561,7 +622,7 @@ export const User = () => {
                  {/* Role */}
                  <div className="col-span-2 md:col-span-1">
                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Role</label>
-                    <select className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer">
+                    <select defaultValue={selectedUser?.role || "USER"} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer">
                       <option>Admin</option>
                       <option>User</option>
                     </select>
@@ -570,7 +631,7 @@ export const User = () => {
                  {/* Status */}
                  <div className="col-span-2 md:col-span-1">
                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Status</label>
-                    <select className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer">
+                    <select defaultValue={selectedUser?.status === "TRUE" ? "Active" : "Inactive"} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer">
                       <option>Active</option>
                       <option>Inactive</option>
                       <option>Pending</option>
@@ -582,7 +643,7 @@ export const User = () => {
                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Username</label>
                     <div className="relative">
                       <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input type="text" defaultValue="admin01" className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
+                      <input type="text" defaultValue={selectedUser?.username || ""} className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
                     </div>
                  </div>
 
@@ -608,7 +669,7 @@ export const User = () => {
               </div>
 
               {/* Modal Footer */}
-              <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3 bg-gray-50/50 flex-shrink-0">
+              <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3 bg-white">
                 <button 
                   onClick={() => setIsEditUserModalOpen(false)}
                   className="px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium transition-all shadow-sm"
@@ -623,6 +684,170 @@ export const User = () => {
             </div>
           </div>
         )}
+
+        {/* ================= BLOCK CONFIRM MODAL ================= */}
+        {isBlockConfirmOpen && selectedUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/20 backdrop-blur-sm">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md flex flex-col">
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
+                <h3 className="text-lg font-bold text-gray-900">Xác nhận khóa tài khoản</h3>
+                <button 
+                  onClick={() => {
+                    setIsBlockConfirmOpen(false);
+                    setSelectedUser(null);
+                  }}
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="px-6 py-5 flex gap-4 items-start bg-white">
+                <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-red-50">
+                  <Lock className="w-6 h-6 text-red-600" />
+                </div>
+                <div className="text-sm text-gray-600">
+                  <p className="font-medium text-gray-900 mb-1">
+                    Bạn có chắc muốn khóa tài khoản này không?
+                  </p>
+                  <p>
+                    Người dùng <span className="font-semibold">{selectedUser?.username}</span> (ID: <span className="font-mono text-xs">{selectedUser?.id}</span>) sẽ không thể đăng nhập nữa.
+                  </p>
+                  <p className="mt-2 text-xs text-gray-400">
+                    Hành động này có thể hoàn tác bằng cách mở khóa sau (hoặc thao tác từ backend).
+                  </p>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-4 border-t border-gray-100 bg-white flex items-center justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setIsBlockConfirmOpen(false);
+                    setSelectedUser(null);
+                  }}
+                  className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={() => {
+                    handleLockAccount();
+                  }}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm"
+                >
+                  Khóa tài khoản
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+{isViewUserModalOpen && viewUser && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden animate-in zoom-in-95 duration-200">
+      {/* Header */}
+      <div className="px-6 py-3 bg-white border-b border-gray-100 flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900">Chi tiết người dùng</h3>
+        <button
+          onClick={() => {
+            setIsViewUserModalOpen(false);
+            setViewUser(null);
+          }}
+          className="p-2 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="p-6 bg-white space-y-5">
+        {/* Profile card (light) */}
+        <div className="bg-gray-50 border border-gray-100 rounded-lg p-4 flex items-center gap-4">
+          <div className={`w-14 h-14 rounded-full flex items-center justify-center text-white ${viewUser.avatarColor}`}>
+            <span className="font-bold text-lg">{viewUser.initials}</span>
+          </div>
+          <div className="flex-1">
+            <div className="text-lg font-semibold text-gray-900">{viewUser.username}</div>
+            <div className="text-sm text-gray-500 mt-1">{viewUser.email}</div>
+            <div className="mt-3 grid grid-cols-2 gap-2 text-sm text-gray-600">
+              <div>
+                <div className="text-xs text-gray-400">Số đơn hàng</div>
+                <div className="font-medium text-gray-800">{viewUser.ordersCount}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-400">Tổng chi tiêu</div>
+                <div className="font-medium text-gray-800">{formatVND(viewUser.totalSpent)}</div>
+              </div>
+              <div className="col-span-2 mt-1">
+                <div className="text-xs text-gray-400">Ngày tham gia</div>
+                <div className="font-medium text-gray-800">{viewUser.joinDate.split(' ')[0]}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent activities */}
+        <div>
+          <h4 className="text-sm font-semibold text-gray-800 mb-2">Hoạt động gần đây</h4>
+          <div className="space-y-3">
+            <div className="bg-white border border-gray-100 rounded-lg p-3 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-md bg-indigo-50 flex items-center justify-center text-indigo-600">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M3 8h18M3 12h18M3 16h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-800 font-medium">Đặt vé sự kiện "Concert Mùa Hè 2024"</div>
+                  <div className="text-xs text-gray-500 mt-0.5">2 giờ trước</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white border border-gray-100 rounded-lg p-3 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-md bg-purple-50 flex items-center justify-center text-purple-600">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M5 9h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-800 font-medium">Đăng nhập vào hệ thống</div>
+                  <div className="text-xs text-gray-500 mt-0.5">1 ngày trước</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Footer */}
+      <div className="px-6 py-4 bg-white border-t border-gray-100 flex items-center justify-end gap-3">
+        <button
+          onClick={() => {
+            setIsViewUserModalOpen(false);
+            setViewUser(null);
+          }}
+          className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+        >
+          Đóng
+        </button>
+        <button
+          onClick={() => {
+            // Close view and open edit for same user
+            setIsViewUserModalOpen(false);
+            setIsEditUserModalOpen(true);
+            setSelectedUser(viewUser);
+          }}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+        >
+          Chỉnh sửa
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       </div>
     </MainLayout>
   );

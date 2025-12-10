@@ -11,9 +11,11 @@ import { BlogPage } from "@/user/pages/blog/blog";
 import { NotFound } from "@/user/components/ui/not-found";
 import SearchPage from "@/user/pages/search";
 import { ChatbotDashboard } from "@/dashboard/chatbot";
-import { User } from "@/dashboard/user";
-
-
+import { UserDashBoard } from "@/dashboard/user";
+import { ProductDashBoard } from "@/dashboard/products";
+import { MainDashBoard } from "@/dashboard/main-dashboard";
+import { OrderDashBoard } from "@/dashboard/orders";
+import { PromotionsDashBoard } from "@/dashboard/promotions";
 function App() {
   return (
     <Routes>
@@ -27,8 +29,12 @@ function App() {
 
 
       <Route element={<ChatbotDashboard />} path="/dashboard/chatbot" />
-      <Route element={<User />} path="/dashboard/users" />
-
+      <Route element={<UserDashBoard />} path="/dashboard/users" />
+      <Route element={<ProductDashBoard />} path="/dashboard/products" />
+      <Route element={<MainDashBoard />} path="/dashboard/main" />
+      <Route element={<OrderDashBoard />} path="/dashboard/orders" />
+      <Route element={<PromotionsDashBoard />} path="/dashboard/promotions" />
+      
       <Route element={<NotFound />} path="/*"></Route>
     </Routes>
   );
