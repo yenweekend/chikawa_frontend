@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 
 // === IMPORT LAYOUT ===
+// Lưu ý: Đảm bảo đường dẫn này đúng với cấu trúc thư mục thực tế của bạn
 import { MainLayout } from "./layouts/main-layout";
 
 // ===============================================
@@ -75,6 +76,19 @@ function getDayAbbreviation(dayName) {
   return dayName.substring(0, 3);
 }
 
+// Hàm format ngày ngắn cho trục X của biểu đồ (ví dụ: 12/11)
+function formatDateShort(dateString) {
+  if (!dateString) return '';
+  try {
+    const date = new Date(dateString);
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${d}/${m}`;
+  } catch (e) {
+    return dateString;
+  }
+}
+
 function getFakeData() {
   return {
     stats: {
@@ -84,8 +98,16 @@ function getFakeData() {
       potentialCount: 1,
       spamCount: 1,
       dailyStats: [
+        { date: "2025-11-04", count: 12, dayOfWeek: "Tuesday" },
+        { date: "2025-11-05", count: 19, dayOfWeek: "Wednesday" },
+        { date: "2025-11-06", count: 8, dayOfWeek: "Thursday" },
+        { date: "2025-11-07", count: 25, dayOfWeek: "Friday" },
+        { date: "2025-11-08", count: 15, dayOfWeek: "Saturday" },
+        { date: "2025-11-09", count: 5, dayOfWeek: "Sunday" },
+        { date: "2025-11-10", count: 10, dayOfWeek: "Monday" },
         { date: "2025-11-11", count: 6, dayOfWeek: "Tuesday" },
-        { date: "2025-11-12", count: 5, dayOfWeek: "Wednesday" }
+        { date: "2025-11-12", count: 5, dayOfWeek: "Wednesday" },
+        { date: "2025-11-13", count: 18, dayOfWeek: "Thursday" }
       ]
     },
     conversations: [
@@ -129,7 +151,7 @@ const StatItem = ({ title, value, icon: Icon, color }) => {
   };
   const colors = colorConfig[color] || colorConfig.blue; 
   return (
-    <div className="flex items-center space-x-3 min-w-[200px] p-2">
+    <div className="flex items-center space-x-4 min-w-[215px]">
       <div className={`p-3 rounded-full ${colors.bg}`}>
         <Icon className={colors.text} size={24} />
       </div>
@@ -142,86 +164,100 @@ const StatItem = ({ title, value, icon: Icon, color }) => {
 };
 
 const ConversationsChart = ({ dailyStats = [], totalConversations = 0 }) => {
-  const legendData = [
-    { day: 'Mon', color: 'bg-blue-500' },
-    { day: 'Tue', color: 'bg-green-500' },
-    { day: 'Wed', color: 'bg-purple-500' },
-    { day: 'Thu', color: 'bg-yellow-500' },
-    { day: 'Fri', color: 'bg-pink-500' },
-    { day: 'Sat', color: 'bg-blue-800' },
-    { day: 'Sun', color: 'bg-red-500' },
-  ];
+  // Lấy tối đa 10 phần tử cuối cùng (gần nhất)
+  const chartData = dailyStats.slice(-10);
+  
+  // Tìm giá trị lớn nhất để tính chiều cao cột (scale)
+  // Nếu maxCount = 0 (không có data), đặt là 1 để tránh lỗi chia cho 0
+  const maxCount = Math.max(...chartData.map(d => d.count), 1); 
+
   const dailyAverage = (dailyStats && dailyStats.length > 0)
     ? (totalConversations / dailyStats.length).toFixed(0) 
     : 0;
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mt-6 w-full">
-      <h2 className="text-xl font-bold text-gray-900 mb-6 whitespace-nowrap">Conversations (Last 7 Days)</h2>
-      <div className="flex justify-around items-center text-center mb-6 px-4">
-        {dailyStats.length === 0 && <p className="text-sm text-gray-500 w-full text-center">No daily stats available.</p>}
-        {dailyStats.map((item) => {
-          const dayAbbr = getDayAbbreviation(item.dayOfWeek);
-          const legendItem = legendData.find(l => l.day === dayAbbr);
-          const colorClass = legendItem ? legendItem.color.replace('bg-', 'text-') : 'text-gray-700';
+      <div className="flex justify-between items-end mb-6">
+        <h2 className="text-xl font-bold text-gray-900 whitespace-nowrap">Conversations (Last 10 Days)</h2>
+        <div className="text-right">
+           <span className="text-sm text-gray-500">Total: </span>
+           <span className="text-lg font-bold text-gray-900">{totalConversations}</span>
+           <span className="mx-2 text-gray-300">|</span>
+           <span className="text-sm text-gray-500">Avg/Day: </span>
+           <span className="text-lg font-bold text-gray-900">{dailyAverage}</span>
+        </div>
+      </div>
+
+      {/* Khu vực vẽ biểu đồ */}
+      {/* Thêm pt-6 để chừa chỗ cho số hiển thị trên cột */}
+      <div className="w-full h-64 flex items-end justify-between space-x-2 sm:space-x-4 px-2 pt-6 pb-2">
+        {chartData.length === 0 && (
+           <div className="w-full h-full flex items-center justify-center text-gray-400">No data available</div>
+        )}
+        
+        {chartData.map((item, index) => {
+          // Tính chiều cao cột theo phần trăm
+          const heightPercent = (item.count / maxCount) * 100;
+          // Đảm bảo cột có chiều cao tối thiểu (2%) để hiển thị dải màu nếu có giá trị > 0
+          const displayHeight = item.count > 0 ? `${Math.max(heightPercent, 2)}%` : '0px';
+          
           return (
-            <div key={item.date} className="flex flex-col items-center space-y-1">
-              <span className={`text-sm font-medium ${colorClass}`}>{dayAbbr}</span>
-              <span className="text-lg font-bold text-gray-800">{item.count}</span>
+            <div key={index} className="flex flex-col items-center justify-end flex-1 h-full group">
+              {/* Số lượng: Hiển thị ngay trên cột bằng Flexbox, không dùng absolute để tránh lệch */}
+              <div className="mb-1 text-xs font-bold text-blue-600 text-center w-full">
+                {item.count}
+              </div>
+              
+              {/* Cột biểu đồ */}
+              <div 
+                className="w-full bg-blue-100 rounded-t-md relative hover:bg-blue-200 transition-all duration-300 cursor-pointer"
+                style={{ height: displayHeight }}
+              >
+                 {/* Phần màu đậm hơn ở trên cùng cột */}
+                 {item.count > 0 && (
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-blue-500 rounded-t-md"></div>
+                 )}
+              </div>
             </div>
           );
         })}
       </div>
-      <div className="border-t border-gray-200 my-4"></div>
-      <div className="flex justify-center items-center space-x-4 flex-wrap px-4">
-        {legendData.map((item) => (
-          <div key={item.day} className="flex items-center space-x-1.5 my-1">
-            <div className={`w-3 h-3 rounded-full ${item.color}`}></div>
-            <span className="text-xs font-medium text-gray-600">{item.day}</span>
-          </div>
-        ))}
-      </div>
-      <div className="border-t border-gray-200 my-4"></div>
-      <div className="flex justify-around items-center text-center">
-        <div className="px-4">
-          <p className="text-3xl font-bold text-gray-900">{totalConversations}</p>
-          <p className="text-sm font-medium text-gray-500">Total Conversations</p>
-        </div>
-        <div className="px-4">
-          <p className="text-3xl font-bold text-gray-900">{dailyAverage}</p>
-          <p className="text-sm font-medium text-gray-500">Daily Average</p>
-        </div>
+      
+      {/* Trục hoành (Labels): Tách riêng bên dưới */}
+      <div className="border-t border-gray-200 w-full pt-2 flex justify-between space-x-2 sm:space-x-4 px-2">
+         {chartData.map((item, index) => (
+            <div key={index} className="flex-1 text-center">
+               <div className="text-xs text-gray-500 font-medium truncate">
+                  {formatDateShort(item.date)}
+               </div>
+            </div>
+         ))}
       </div>
     </div>
   );
 };
 
-const ConversationsFilterTabs = ({ currentFilterValue, onFilterChange }) => {
+const ConversationsFilterTabs = ({ 
+  currentFilterValue, 
+  onFilterChange, 
+  startDate, 
+  setStartDate, 
+  endDate, 
+  setEndDate, 
+  onSearchDate,
+  onRefresh 
+}) => {
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mt-6 w-full">
+    <div className="bg-white rounded-lg shadow-md p-6 mt-6">
       <div className="flex border-b border-gray-200 mb-6 overflow-x-auto">
         <button className="flex items-center space-x-2 px-4 py-3 border-b-2 border-yellow-500 text-yellow-600 font-semibold whitespace-nowrap">
           <MessagesSquare size={18} />
           <span className="whitespace-nowrap">Conversations</span>
         </button>
-        <button className="flex items-center space-x-2 px-4 py-3 text-gray-500 hover:text-gray-700 whitespace-nowrap">
-          <ShoppingCart size={18} />
-          <span>Orders</span>
-          <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">12</span>
-        </button>
-        <button className="flex items-center space-x-2 px-4 py-3 text-gray-500 hover:text-gray-700 whitespace-nowrap">
-          <CheckCircle size={18} />
-          <span>Delivered</span>
-          <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full">25</span>
-        </button>
       </div>
+
       <div className="flex flex-wrap items-center gap-4 mb-4">
-        <div className="flex items-center space-x-2">
-          <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Date Range:</label>
-          <div className="relative"><input type="text" placeholder="mm/dd/yyyy" className="border border-gray-300 rounded-md p-2 pl-8 text-sm w-36"/><Calendar className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" size={16} /></div>
-          <span className="text-gray-500">to</span>
-          <div className="relative"><input type="text" placeholder="mm/dd/yyyy" className="border border-gray-300 rounded-md p-2 pl-8 text-sm w-36"/><Calendar className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" size={16} /></div>
-        </div>
+        {/* Bộ lọc Status */}
         <div className="flex items-center space-x-2">
           <label htmlFor="statusFilter" className="text-sm font-medium text-gray-700 whitespace-nowrap">Status:</label>
           <select id="statusFilter" className="border border-gray-300 rounded-md p-2 text-sm bg-white" value={currentFilterValue} onChange={(e) => onFilterChange(Number(e.target.value))}>
@@ -232,13 +268,46 @@ const ConversationsFilterTabs = ({ currentFilterValue, onFilterChange }) => {
           </select>
         </div>
       </div>
+
       <div className="flex flex-wrap items-center gap-4">
-        <div className="relative flex-grow min-w-[200px]">
-          <input type="text" placeholder="Search conversations..." className="border border-gray-300 rounded-md p-2 pl-10 text-sm w-full" />
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        
+        {/* Date Range Inputs */}
+        <div className="flex items-center space-x-2 flex-grow">
+            <div className="relative w-full">
+                <input 
+                  type="date" 
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="border border-gray-300 rounded-md p-2 pl-2 text-sm w-full"
+                />
+            </div>
+            <span className="text-gray-500 font-medium">to</span>
+            <div className="relative w-full">
+                <input 
+                  type="date" 
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="border border-gray-300 rounded-md p-2 pl-2 text-sm w-full"
+                />
+            </div>
         </div>
-        <button className="flex items-center space-x-2 bg-yellow-400 hover:bg-yellow-500 text-white font-semibold px-4 py-2 rounded-md text-sm"><Search size={16} /><span>Search</span></button>
-        <button className="flex items-center space-x-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold px-4 py-2 rounded-md text-sm"><RefreshCw size={16} /><span>Refresh</span></button>
+
+        {/* Nút Search */}
+        <button 
+          onClick={onSearchDate}
+          className="flex items-center space-x-2 bg-yellow-400 hover:bg-yellow-500 text-white font-semibold px-4 py-2 rounded-md text-sm"
+        >
+          <Search size={16} />
+          <span>Search</span>
+        </button>
+        
+        <button 
+          onClick={onRefresh} 
+          className="flex items-center space-x-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold px-4 py-2 rounded-md text-sm"
+        >
+          <RefreshCw size={16} />
+          <span>Refresh</span>
+        </button>
         <button className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-md text-sm whitespace-nowrap"><BarChart size={16} /><span>Advanced Analysis</span></button>
       </div>
     </div>
@@ -291,22 +360,34 @@ const ConversationsTable = ({
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              {['ID', 'Customer ID', 'Phone', 'Status', 'Analyze', 'Date & Time', 'Actions'].map(h => (
+              {['STT', 'ID', 'Customer ID', 'Status', 'Analyze', 'Date & Time', 'Actions'].map(h => (
                 <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {conversations.length === 0 && <tr><td colSpan="7" className="px-6 py-4 text-center text-sm text-gray-500">No conversations found.</td></tr>}
-            {conversations.map((row) => (
+            {conversations.length === 0 && (
+              <tr>
+                <td colSpan="7" className="px-6 py-8 text-center text-sm text-gray-500">
+                  <div className="flex flex-col items-center justify-center">
+                    <MessagesSquare size={48} className="text-gray-300 mb-2" />
+                    <p className="text-lg font-medium text-gray-600">No conversations found</p>
+                    <p className="text-sm text-gray-400">Try adjusting your filters or date range.</p>
+                  </div>
+                </td>
+              </tr>
+            )}
+            {conversations.map((row, index) => (
               <tr key={row.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  {(currentPage - 1) * itemsPerPage + index + 1}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 truncate max-w-xs">
                   {row.id}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                   {row.userId ? row.userId : 'Guest'}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">N/A</td>
                 <td className="px-6 py-4 whitespace-nowrap"><StatusTag status={row.status} /></td>
                 <td className="px-6 py-4 whitespace-nowrap"><AnalyzeTag analyzed={row.analyzed} /></td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{formatDateTime(row.createdAt)}</td>
@@ -482,7 +563,12 @@ export const ChatbotDashboard = () => {
   const [error, setError] = useState(null);
   const [overviewData, setOverviewData] = useState(null);
   const [showErrorBanner, setShowErrorBanner] = useState(true);
+  
+  // === STATE CÁC BỘ LỌC ===
   const [statusFilter, setStatusFilter] = useState(0); 
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [confirmationState, setConfirmationState] = useState({ isOpen: false, type: null, data: null, title: '', message: '' });
   
@@ -506,6 +592,9 @@ export const ChatbotDashboard = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedConversations = allConversations.slice(startIndex, startIndex + itemsPerPage);
 
+  // === API CALLS ===
+  
+  // 1. Fetch Overview (Tải toàn bộ ban đầu)
   const fetchData = useCallback(async () => {
     setShowErrorBanner(true); setError(null);
     try {
@@ -526,13 +615,8 @@ export const ChatbotDashboard = () => {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleViewClick = (conversationData) => { setSelectedConversation(conversationData); };
-  const handleCloseModal = () => { setSelectedConversation(null); };
-  const handleAnalyzeClick = (conversation) => { setConfirmationState({ isOpen: true, type: 'analyze', data: conversation, title: 'Confirm Analysis', message: `Are you sure you want to analyze conversation ID: ${conversation.id}?` }); };
-  const handleDeleteClick = (conversation) => { setConfirmationState({ isOpen: true, type: 'delete', data: conversation, title: 'Confirm Deletion', message: `Are you sure you want to delete conversation ID: ${conversation.id}? This action cannot be undone.` }); };
-  const handleCloseConfirmation = useCallback(() => { setConfirmationState({ isOpen: false, type: null, data: null, title: '', message: '' }); }, []);
-
-  const executeFilter = useCallback(async () => {
+  // 2. Execute Filter Status (Tự động chạy khi đổi dropdown)
+  const executeFilterStatus = useCallback(async () => {
     if (statusFilter === 0) { if (!isInitialMount.current) await fetchData(); return; }
     console.log(`Filtering by status: ${statusFilter}`); setLoading(true); setError(null);
     try {
@@ -545,7 +629,67 @@ export const ChatbotDashboard = () => {
     finally { setLoading(false); }
   }, [statusFilter, fetchData]);
 
-  useEffect(() => { if (isInitialMount.current) { isInitialMount.current = false; } else { executeFilter(); } }, [statusFilter, executeFilter]);
+  useEffect(() => { if (isInitialMount.current) { isInitialMount.current = false; } else { executeFilterStatus(); } }, [statusFilter, executeFilterStatus]);
+
+
+  // 3. Execute Date Filter (Khi nhấn nút Search)
+  const handleDateSearch = async () => {
+    if (!startDate || !endDate) {
+      alert("Please select both start date and end date.");
+      return;
+    }
+    if (new Date(endDate) < new Date(startDate)) {
+      alert("End date cannot be earlier than start date.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_BASE_URL}/by-date?startDate=${startDate}&endDate=${endDate}`, { 
+        method: 'GET', 
+        mode: 'cors', 
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } 
+      });
+
+      if (!response.ok) {
+        throw new Error(`Date filter API failed! status: ${response.status}`);
+      }
+
+      const filteredConversations = await response.json();
+      // API trả về List<Conversation>
+      setOverviewData(prevData => ({ 
+        stats: prevData?.stats || getFakeData().stats, 
+        conversations: filteredConversations 
+      }));
+      setCurrentPage(1); // Reset trang
+
+    } catch (err) {
+      console.error("Failed to filter by date:", err);
+      setError(err.message);
+      setShowErrorBanner(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const handleRefresh = useCallback(() => {
+    setStartDate('');
+    setEndDate('');
+    if (statusFilter !== 0) {
+       setStatusFilter(0); 
+    } else {
+       fetchData(); 
+    }
+  }, [statusFilter, fetchData]);
+
+  // --- Event Handlers ---
+  const handleViewClick = (conversationData) => { setSelectedConversation(conversationData); };
+  const handleCloseModal = () => { setSelectedConversation(null); };
+  const handleAnalyzeClick = (conversation) => { setConfirmationState({ isOpen: true, type: 'analyze', data: conversation, title: 'Confirm Analysis', message: `Are you sure you want to analyze conversation ID: ${conversation.id}?` }); };
+  const handleDeleteClick = (conversation) => { setConfirmationState({ isOpen: true, type: 'delete', data: conversation, title: 'Confirm Deletion', message: `Are you sure you want to delete conversation ID: ${conversation.id}? This action cannot be undone.` }); };
+  const handleCloseConfirmation = useCallback(() => { setConfirmationState({ isOpen: false, type: null, data: null, title: '', message: '' }); }, []);
 
   const handleConfirmAction = useCallback(async () => {
     const { type, data } = confirmationState;
@@ -591,7 +735,7 @@ export const ChatbotDashboard = () => {
   }
 
   const derivedStats = [
-    { id: 1, title: 'Total Conversations', value: overviewData.stats.totalConversations, icon: MessagesSquare, color: 'blue' },
+    { id: 1, title: 'Conversations', value: overviewData.stats.totalConversations, icon: MessagesSquare, color: 'blue' },
     { id: 2, title: 'Analyzed', value: overviewData.stats.analyzedCount, icon: LineChart, color: 'green' },
     { id: 3, title: 'Pending', value: overviewData.stats.pendingCount, icon: Clock, color: 'yellow' },
     { id: 4, title: 'Potential (Good)', value: overviewData.stats.potentialCount, icon: CheckCircle2, color: 'green' },
@@ -629,7 +773,18 @@ export const ChatbotDashboard = () => {
           </div>
 
           <ConversationsChart dailyStats={overviewData.stats.dailyStats} totalConversations={overviewData.stats.totalConversations} />
-          <ConversationsFilterTabs currentFilterValue={statusFilter} onFilterChange={setStatusFilter} />
+          
+          {/* CẬP NHẬT: Truyền props Date Range và Search */}
+          <ConversationsFilterTabs 
+            currentFilterValue={statusFilter} 
+            onFilterChange={setStatusFilter}
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+            onSearchDate={handleDateSearch}
+            onRefresh={handleRefresh} 
+          />
           
           <ConversationsTable 
             conversations={paginatedConversations} 

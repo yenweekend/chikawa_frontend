@@ -19,8 +19,8 @@ export const MainLayout = ({ children }) => {
       <aside className="w-64 bg-white shadow-lg fixed h-full z-20 flex flex-col">
         {/* Logo Area */}
         <div className="p-6 flex items-center space-x-2">
-          <InfinityIcon className="text-purple-700 w-8 h-8" />
-          <span className="text-2xl font-bold text-purple-700">Spodut</span>
+          <InfinityIcon className="text-yellow-500 w-8 h-8" />
+          <span className="text-2xl font-bold text-yellow-500">Chiikawa</span>
         </div>
 
         {/* Menu Items */}
@@ -66,7 +66,7 @@ export const MainLayout = ({ children }) => {
 
           <div className="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer">
             <Bell size={20} className="mr-3" />
-            <span className="font-medium">Notifications</span>
+            <span className="font-medium">Promotions</span>
           </div>
 
           <div className="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer">
