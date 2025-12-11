@@ -691,7 +691,7 @@ export const UserDashBoard = () => {
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-md flex flex-col">
               {/* Header */}
               <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
-                <h3 className="text-lg font-bold text-gray-900">Xác nhận khóa tài khoản</h3>
+                <h3 className="text-lg font-bold text-gray-900">Confirm lock account</h3>
                 <button 
                   onClick={() => {
                     setIsBlockConfirmOpen(false);
@@ -710,13 +710,13 @@ export const UserDashBoard = () => {
                 </div>
                 <div className="text-sm text-gray-600">
                   <p className="font-medium text-gray-900 mb-1">
-                    Bạn có chắc muốn khóa tài khoản này không?
+                    Are you sure to lock this account?
                   </p>
                   <p>
-                    Người dùng <span className="font-semibold">{selectedUser?.username}</span> (ID: <span className="font-mono text-xs">{selectedUser?.id}</span>) sẽ không thể đăng nhập nữa.
+                    User <span className="font-semibold">{selectedUser?.username}</span> (ID: <span className="font-mono text-xs">{selectedUser?.id}</span>) wont't login.
                   </p>
                   <p className="mt-2 text-xs text-gray-400">
-                    Hành động này có thể hoàn tác bằng cách mở khóa sau (hoặc thao tác từ backend).
+                    This action can be undone by unlocking it later.
                   </p>
                 </div>
               </div>
@@ -730,7 +730,7 @@ export const UserDashBoard = () => {
                   }}
                   className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
                 >
-                  Hủy
+                  Cancel
                 </button>
                 <button
                   onClick={() => {
@@ -738,7 +738,7 @@ export const UserDashBoard = () => {
                   }}
                   className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm"
                 >
-                  Khóa tài khoản
+                  Lock account
                 </button>
               </div>
             </div>
@@ -750,7 +750,7 @@ export const UserDashBoard = () => {
     <div className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden animate-in zoom-in-95 duration-200">
       {/* Header */}
       <div className="px-6 py-3 bg-white border-b border-gray-100 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">Chi tiết người dùng</h3>
+        <h3 className="text-lg font-semibold text-gray-900">User Details</h3>
         <button
           onClick={() => {
             setIsViewUserModalOpen(false);
@@ -774,15 +774,15 @@ export const UserDashBoard = () => {
             <div className="text-sm text-gray-500 mt-1">{viewUser.email}</div>
             <div className="mt-3 grid grid-cols-2 gap-2 text-sm text-gray-600">
               <div>
-                <div className="text-xs text-gray-400">Số đơn hàng</div>
+                <div className="text-xs text-gray-400">Number of orders</div>
                 <div className="font-medium text-gray-800">{viewUser.ordersCount}</div>
               </div>
               <div>
-                <div className="text-xs text-gray-400">Tổng chi tiêu</div>
+                <div className="text-xs text-gray-400">Total Spent</div>
                 <div className="font-medium text-gray-800">{formatVND(viewUser.totalSpent)}</div>
               </div>
               <div className="col-span-2 mt-1">
-                <div className="text-xs text-gray-400">Ngày tham gia</div>
+                <div className="text-xs text-gray-400">Join Date</div>
                 <div className="font-medium text-gray-800">{viewUser.joinDate.split(' ')[0]}</div>
               </div>
             </div>
@@ -791,7 +791,7 @@ export const UserDashBoard = () => {
 
         {/* Recent activities */}
         <div>
-          <h4 className="text-sm font-semibold text-gray-800 mb-2">Hoạt động gần đây</h4>
+          <h4 className="text-sm font-semibold text-gray-800 mb-2">Recent Activity</h4>
           <div className="space-y-3">
             <div className="bg-white border border-gray-100 rounded-lg p-3 shadow-sm">
               <div className="flex items-start gap-3">
@@ -799,8 +799,8 @@ export const UserDashBoard = () => {
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M3 8h18M3 12h18M3 16h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-800 font-medium">Đặt vé sự kiện "Concert Mùa Hè 2024"</div>
-                  <div className="text-xs text-gray-500 mt-0.5">2 giờ trước</div>
+                  <div className="text-sm text-gray-800 font-medium">Booked ticket for event "Summer Concert 2024"</div>
+                  <div className="text-xs text-gray-500 mt-0.5">2 hours ago</div>
                 </div>
               </div>
             </div>
@@ -811,8 +811,8 @@ export const UserDashBoard = () => {
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M5 9h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-800 font-medium">Đăng nhập vào hệ thống</div>
-                  <div className="text-xs text-gray-500 mt-0.5">1 ngày trước</div>
+                  <div className="text-sm text-gray-800 font-medium">Logged into the system</div>
+                  <div className="text-xs text-gray-500 mt-0.5">1 day ago</div>
                 </div>
               </div>
             </div>
@@ -830,7 +830,7 @@ export const UserDashBoard = () => {
           }}
           className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
         >
-          Đóng
+          Close
         </button>
         <button
           onClick={() => {
@@ -841,7 +841,7 @@ export const UserDashBoard = () => {
           }}
           className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
         >
-          Chỉnh sửa
+          Edit
         </button>
       </div>
     </div>
