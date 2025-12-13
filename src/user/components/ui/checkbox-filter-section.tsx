@@ -61,7 +61,7 @@ export const CheckboxFilterSection = ({
             <Checkbox
               checked={isAllSelected}
               onCheckedChange={(checked) => handleSelectAll(checked === true)}
-              className="m-0 size-5"
+              className="m-0 size-5 border border-border shadow-none"
             />
             <label className="text-foreground text-base font-medium">All</label>
           </div>

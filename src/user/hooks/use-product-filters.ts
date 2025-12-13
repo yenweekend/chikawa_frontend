@@ -8,7 +8,11 @@ import {
   PRODUCT_STOCK_STATUS_OPTIONS,
   PRODUCT_FILTER_LABELS,
 } from "@/user/constants/product";
-import { createArrayParamParser, getFilterLabel } from "@/lib/utils/filter";
+import {
+  createArrayParamParser,
+  createSearchApplier,
+  getFilterLabel,
+} from "@/lib/utils/filter";
 
 export type FilterProducts = {
   categories: string[];
@@ -167,6 +171,8 @@ export const useProductFilters = (
     setSearchKeyword("");
   }, [navigate]);
 
+  const applySearch = createSearchApplier(applyFilters, appliedFilters);
+
   const filters: Filter[] = useMemo(() => {
     return (
       Object.entries(appliedFilters) as [
@@ -222,5 +228,6 @@ export const useProductFilters = (
 
     filters,
     setAppliedFilters,
+    applySearch,
   };
 };

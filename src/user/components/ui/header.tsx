@@ -3,15 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { NAVIGATIONS } from "@/user/constants/paths";
 
 import { Navigation } from "@/user/components/ui/navigation";
-import { useSelector } from "react-redux";
-import type { RootState } from "@/stores/store";
+import { useUserStore } from "@/user/stores/signup-store";
 
 export const Header = () => {
   const navigate = useNavigate();
-  const user = useSelector((state: RootState) => state.auth.user);
-  const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated
-  );
+  const { user, isAuthenticated } = useUserStore();
+  console.log(user, isAuthenticated);
 
   return (
     <>

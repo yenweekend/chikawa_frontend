@@ -52,7 +52,7 @@ export type ProductCharacter = {
   count: number;
 };
 
-export type StockStatus = "availabe" | "sold_out";
+export type StockStatus = "availabel" | "sold_out";
 
 export type ProductSearchParams = {
   q?: string;

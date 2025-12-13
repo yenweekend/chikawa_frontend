@@ -3,6 +3,7 @@ import { Typography } from "@/components/ui/typography";
 import { formatPrice } from "@/lib/utils/form-utils";
 import { Link } from "react-router-dom";
 import { DoorOpen } from "lucide-react";
+import type { StockStatus } from "@/user/types/products";
 
 interface ProductCardProps {
   title?: string;
@@ -10,6 +11,7 @@ interface ProductCardProps {
   imgUrl?: string;
   href?: string;
   className?: string;
+  status?: StockStatus;
 }
 
 const ProductCard = ({
@@ -18,15 +20,20 @@ const ProductCard = ({
   price = 0,
   href = "#",
   imgUrl = "https://via.placeholder.com/300x300?text=No+Image",
+  status = "availabel",
 }: ProductCardProps) => {
   return (
     <div
       className={cn(
-        "rounded-xl  hover:cursor-pointer overflow-hidden p-4 bg-white border-black transition-all duration-300 pb-10",
+        "rounded-xl  hover:cursor-pointer overflow-hidden p-4 bg-white border-black transition-all duration-300 pb-10 relative",
         className
       )}
     >
-      <div className="bg-white p-2 h-full flex flex-col">
+      <div className="bg-white p-2 h-full flex flex-col ">
+        {status === "sold_out"}
+        <div className="absolute bg-black px-3 py-2 rounded-br-2xl text-white top-0 left-0">
+          Sold Out
+        </div>
         <div className="group flex  justify-center items-center overflow-hidden rounded-lg h-100  ">
           {imgUrl ? (
             <img

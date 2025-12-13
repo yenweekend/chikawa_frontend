@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { loginSchema } from "@/user/schemas/auth";
+import { forgotPasswordSchema } from "@/user/schemas/auth";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,68 +12,47 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useUserStore } from "@/user/stores/signup-store";
 
 import { MainLayout } from "@/user/layouts/main-layout";
 import { Typography } from "@/components/ui/typography";
 import { Form } from "@/components/ui/form";
 import { FormField } from "@/components/ui/form";
 import { FormInputField } from "@/components/ui/form-input";
-import { LineIcon } from "@/user/components/ui/common-icons";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { getErrorMessage } from "@/lib/utils/auth";
-import { loginCredential } from "@/actions/auth-v1";
+import { sendMailForgotPasswordAction } from "@/actions/auth-v1";
 
-export const LoginPage = () => {
+export const ForgotPasswordPage = () => {
   const [isPending, setIsPending] = useState(false);
-  const { setUser } = useUserStore();
+  const navigate = useNavigate();
 
   const form = useForm({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
       email: "",
-      password: "",
     },
     mode: "onChange",
   });
 
-  const LINE_CHANNEL_ID = "2008514826";
-  const REDIRECT_URI = "http://localhost:5173/line/callback";
-  const STATE = "login";
-
-  const lineUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${LINE_CHANNEL_ID}&redirect_uri=${encodeURIComponent(
-    REDIRECT_URI
-  )}&state=${STATE}&scope=profile%20openid%20email`;
-
   const handleSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      setIsPending(true);
 
       form.handleSubmit(async (formData) => {
-        const { email, password } = formData;
-
+        setIsPending(true);
         try {
-          const res = await loginCredential({ email, password });
+          const res = await sendMailForgotPasswordAction({
+            email: formData.email,
+          });
+
+          console.log(res);
 
           if (!res.success) {
             throw new Error(res.message);
           }
-
-          const data = res.data;
-
-          console.log(data);
-
-          setUser({
-            id: data?.id,
-            email: data?.email,
-            fullName: data?.fullName,
-            lineId: data?.lineId,
-          });
-
-          toast.success("Login successful!");
-
-          window.location.href = "/";
+          toast.success("Please go to your gmail to reset password!");
         } catch (err) {
           toast.error(getErrorMessage(err));
         } finally {
@@ -83,13 +62,6 @@ export const LoginPage = () => {
     },
     [form]
   );
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const message = params.get("message");
-
-    if (message) toast.success(message);
-  }, []);
 
   return (
     <MainLayout>
@@ -107,16 +79,8 @@ export const LoginPage = () => {
                     variant={"h2"}
                     className="text-center font-medium"
                   >
-                    Login
+                    Enter your registered email
                   </Typography>
-                  <div
-                    className="flex items-center justify-center cursor-pointer"
-                    onClick={() => {
-                      window.open(lineUrl, "_blank");
-                    }}
-                  >
-                    <LineIcon />
-                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
@@ -136,32 +100,26 @@ export const LoginPage = () => {
                     />
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormInputField
-                      type="password"
-                      label="Password"
-                      required
-                      inputProps={{
-                        placeholder: "Enter password",
-                        autoComplete: "current-password",
-                        disabled: isPending,
-                        ...field,
-                      }}
-                    />
-                  )}
-                />
               </CardContent>
               <CardFooter className="flex-col gap-2">
-                <Button
-                  type="submit"
-                  className="h-10 px-20 py-5 rounded-full bg-blue-600 text-white mx-auto"
-                  disabled={isPending}
-                >
-                  Sign in
-                </Button>
+                <div className="space-y-3">
+                  <Button
+                    type="submit"
+                    className="h-14 w-full rounded-xl"
+                    disabled={isPending}
+                  >
+                    {isPending ? "Sending..." : "Submit"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-14 w-full rounded-xl font-medium"
+                    onClick={() => navigate("/account/login")}
+                    disabled={isPending}
+                  >
+                    <ArrowLeft className="size-5" />
+                    Go to login screen
+                  </Button>
+                </div>
               </CardFooter>
             </Card>
           </form>

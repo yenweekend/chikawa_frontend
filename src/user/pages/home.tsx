@@ -10,6 +10,7 @@ import { getErrorMessage } from "@/lib/utils/auth";
 import { toast } from "sonner";
 import { getHomeData } from "@/actions/product";
 import type { HomeData } from "@/user/types/products";
+import { Loading } from "@/user/components/ui/loading";
 
 export default function HomePage() {
   const [homeData, setHomeData] = useState<HomeData>(undefined);
@@ -36,7 +37,7 @@ export default function HomePage() {
     fetchHomeData();
   }, [fetchHomeData]);
 
-  if (isPending) return "loading...";
+  if (isPending) return <Loading />;
 
   return (
     <MainLayout>

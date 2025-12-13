@@ -17,6 +17,7 @@ import { getErrorMessage } from "@/lib/utils/auth";
 import { getProductDetailAction } from "@/actions/product";
 import { Counter } from "@/user/components/ui/counter";
 import { DoorOpen } from "lucide-react";
+import { Loading } from "@/user/components/ui/loading";
 
 export const ProductDetail = () => {
   const [quantity, setQuantity] = useState<number>(1);
@@ -61,7 +62,7 @@ export const ProductDetail = () => {
     swiperRef.current?.swiper.slideTo(number, 400);
   };
 
-  if (isPending) return "Loading...";
+  if (isPending) return <Loading />;
 
   return (
     <>

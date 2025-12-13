@@ -58,6 +58,8 @@ export const Chatbox = () => {
       if (data.threadId) setThreadId(data.threadId);
       setIsPending(false);
 
+      console.log(data.response);
+
       const botMessage = {
         id: `temp-bot-${Date.now()}`,
         isSelf: false,

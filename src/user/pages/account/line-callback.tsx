@@ -3,8 +3,11 @@ import { useEffect } from "react";
 import { LoadingSpinner } from "@/user/components/overlays/loading-modal";
 
 import { lineCallback } from "@/actions/auth-v2";
+import { useUserStore } from "@/user/stores/signup-store";
 
 export default function LineCallback() {
+  const { setUser } = useUserStore();
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get("code");
@@ -12,9 +15,9 @@ export default function LineCallback() {
     const handleLineCallback = async () => {
       try {
         const data = await lineCallback(code);
-        console.log("DATA:", data);
 
-        if (data.id) {
+        if (data.result.id) {
+          setUser(data.result);
           window.location.href = "/";
         }
       } catch (err) {
@@ -23,6 +26,8 @@ export default function LineCallback() {
     };
 
     if (code) {
+      console.log("chạy");
+
       handleLineCallback();
     }
   }, []);

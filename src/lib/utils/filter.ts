@@ -44,11 +44,18 @@ export function createFilterSubmitHandler<T>(
   applyFilters: (filters: T) => void,
   setIsDirty: (open: boolean) => void
 ) {
-  // console.log(localFilters);
-
   return () => {
     setAppliedFilters(localFilters);
     applyFilters(localFilters);
     setIsDirty(false);
+  };
+}
+
+export function createSearchApplier<T>(
+  applyFilters: (filters: T, keyword?: string) => void,
+  appliedFilters: T
+) {
+  return (keyword: string) => {
+    applyFilters(appliedFilters, keyword);
   };
 }

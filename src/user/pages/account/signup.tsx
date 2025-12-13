@@ -21,6 +21,7 @@ import { FormInputField } from "@/components/ui/form-input";
 import { LineSignUpIcon } from "@/user/components/ui/common-icons";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/utils/auth";
+import { signUpCredential } from "@/actions/auth-v1";
 
 export const SignUpPage = () => {
   const [isPending, setIsPending] = useState(false);
@@ -39,33 +40,21 @@ export const SignUpPage = () => {
   const handleSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      setIsPending(true);
 
       form.handleSubmit(async (formData) => {
         try {
-          const res = await fetch(
-            "https://fearsome-ollie-correspondently.ngrok-free.dev/api/v1/auth/register",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              credentials: "include",
-              body: JSON.stringify({
-                fullName: `${formData.firstName} ${formData.lastName}`,
-                encryptedPassword: `${formData.password}`,
-                email: `${formData.email}`,
-              }),
-            }
-          );
+          setIsPending(true);
+          const res = await signUpCredential(formData);
 
-          const data = await res.json();
-
-          if (!res.ok) {
-            throw new Error(data.errors[0] || "Registration failed");
-          } else {
-            toast.success("Confirmation mail was send to your email account!");
+          if (!res.success) {
+            toast.error(res.message || "Registration failed");
+            return;
           }
+
+          toast.success(
+            res.message ||
+              "A confirmation email has been sent to your email address!"
+          );
         } catch (err) {
           toast.error(getErrorMessage(err));
         } finally {

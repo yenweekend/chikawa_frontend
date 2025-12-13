@@ -39,30 +39,36 @@ import { Button } from "@/components/ui/button";
 import { getConsolidatedErrors } from "@/lib/utils/form-utils";
 import { FormErrorList } from "@/components/ui/form-error-list";
 import { getSearchAction } from "@/actions/product";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/utils/auth";
-
-export const productCategories: ProductCategory[] = [
-  { slug: "preorder", count: 120 },
-  { slug: "mascot", count: 85 },
-  { slug: "home-appliances", count: 42 },
-  { slug: "gaming", count: 64 },
-  { slug: "books", count: 150 },
-];
-
-export const productCharacters: ProductCharacter[] = [
-  { slug: "chiikawa", count: 30 },
-  { slug: "hachiware", count: 12 },
-  { slug: "premium", count: 54 },
-  { slug: "durable", count: 76 },
-  { slug: "limited-edition", count: 18 },
-];
+import ProductCard from "@/user/components/ui/product-card";
+import { Pagination } from "@/components/ui/pagination";
+import { Loading } from "@/user/components/ui/loading";
+import { FormSearchField } from "@/components/ui/search-input";
 
 const SearchPage = () => {
-  const [data, setData] = useState(undefined);
+  const [data, setData] = useState<
+    {
+      id: string;
+      name: string;
+      price: number;
+      categories: string[];
+      characters: string[];
+      images: string[];
+      status: string;
+    }[]
+  >([]);
+
   const [isPending, setIsPending] = useState<boolean>(false);
+  const [totalPage, setTotalPage] = useState<number>(0);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const [characters, setCharacters] = useState<ProductCharacter[]>([]);
+
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const currentPage = Number(searchParams.get("page") ?? 1);
 
   const fetchSearchData = useCallback(async () => {
     try {
@@ -78,20 +84,19 @@ const SearchPage = () => {
         status: searchParams.get("status") || undefined,
         page: Number(searchParams.get("page") || 1),
         q: searchParams.get("keyword")?.trim() || undefined,
-        sortBy:
-          (searchParams.get("sortBy") as ProductSearchParams["sortBy"]) ||
-          "name",
         sortOrder:
           (searchParams.get("sortOrder") as ProductSearchParams["sortOrder"]) ||
           "desc",
       };
 
-      console.log(params);
-
       const response = await getSearchAction(params);
 
       if (response.data) {
-        console.log(response.data);
+        const total = Math.ceil(response.data.total / response.data.limit);
+        setTotalPage(total);
+        setData(response.data.results);
+        setCategories(response.data.categories_count);
+        setCharacters(response.data.characters_count);
       }
     } catch (err) {
       console.log(err);
@@ -110,7 +115,9 @@ const SearchPage = () => {
     filters,
     resetFilters,
     removeFilter,
-  } = useProductFilters(productCategories, productCharacters);
+    searchKeyword,
+    applySearch,
+  } = useProductFilters(categories, characters);
 
   const [localFilters, setLocalFilters] =
     useState<FilterProducts>(appliedFilters);
@@ -125,7 +132,10 @@ const SearchPage = () => {
   });
 
   function onSubmit(values: z.infer<typeof filterPriceSchema>) {
-    console.log("onSubmit", values);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("minPrice", String(values.minPrice));
+    params.set("maxPrice", String(values.maxPrice));
+    navigate(`?${params.toString()}`);
   }
 
   const handleFilterChange = useCallback(
@@ -137,6 +147,15 @@ const SearchPage = () => {
       setIsDirty(true);
     },
     [setLocalFilters]
+  );
+
+  const handlePageChange = useCallback(
+    (page: number) => {
+      const current = new URLSearchParams(searchParams.toString());
+      current.set("page", page.toString());
+      navigate(`?${current.toString()}`);
+    },
+    [navigate, searchParams]
   );
 
   const filterSections: FilterSectionConfig[] = useMemo(
@@ -196,14 +215,25 @@ const SearchPage = () => {
     "maxPrice",
   ]);
 
-  if (isPending) return "loading...";
+  if (isPending) return <Loading />;
 
   return (
-    <MainLayout className="mx-auto max-w-7xl w-[90%]">
-      <Typography>Heading</Typography>
-      <div className="">sort order</div>
-      <div className="flex items-center">
-        <div className="w-[300px] bg-[#fff0f0] rounded-lg">
+    <MainLayout className="mx-auto max-w-[90%] w-[90%]">
+      <Typography className="text-center text-2xl uppercase py-10 ">
+        Search results
+      </Typography>
+      <div className="flex items-center justify-center mb-8 relative w-[740px] mx-auto">
+        <FormSearchField
+          inputProps={{
+            placeholder: "Search",
+            value: searchKeyword,
+          }}
+          onDebouncedSearch={(kw) => applySearch(kw)}
+          className={"w-full"}
+        />
+      </div>
+      <div className="flex items-start gap-10">
+        <div className="shrink-0 w-[300px] bg-[#fff0f0] rounded-lg">
           <CommonFilterSheet
             filterSections={filterSections}
             filters={filters}
@@ -311,6 +341,27 @@ const SearchPage = () => {
               </Form>
             </div>
           </CommonFilterSheet>
+        </div>
+        <div className="space-y-10">
+          <div className="grid grid-cols-4 gap-4 ">
+            {data.map((item) => (
+              <ProductCard
+                key={item.id}
+                title={item.name}
+                imgUrl={item.images[0]}
+                price={item.price}
+                href={`/products/${item.id}`}
+                className="border"
+              />
+            ))}
+          </div>
+          <div className="flex items-center justify-center">
+            <Pagination
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+              totalPages={totalPage}
+            />
+          </div>
         </div>
       </div>
     </MainLayout>

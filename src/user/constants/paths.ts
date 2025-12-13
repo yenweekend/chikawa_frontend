@@ -2,6 +2,9 @@ export const PATHS = {
   HOME: "/",
   LOGIN: "/account/login",
   SIGN_UP: "/account/signup",
+  FORGOT_PASSWORD: "/forgot-password",
+  RESET_PASSWORD: "/reset-password",
+
   PRODUCT_DETAIL: "/products/:id",
   SEARCH: "/search",
   GUIDE: "/guide",
