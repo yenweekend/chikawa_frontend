@@ -62,8 +62,6 @@ export const LoginPage = () => {
 
           const data = res.data;
 
-          console.log(data);
-
           setUser({
             id: data?.id,
             email: data?.email,

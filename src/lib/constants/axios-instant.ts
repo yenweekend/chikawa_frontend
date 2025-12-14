@@ -1,4 +1,9 @@
-import axios, { AxiosError, type AxiosRequestConfig } from "axios";
+import axios, {
+  AxiosError,
+  type AxiosRequestConfig,
+  type AxiosResponseHeaders,
+  type RawAxiosResponseHeaders,
+} from "axios";
 import { SERVER_URL } from "@/lib/constants/common";
 
 interface FailedRequest {
@@ -18,7 +23,6 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
-// 👇 Extend AxiosRequestConfig để thêm _retry
 interface CustomAxiosRequest extends AxiosRequestConfig {
   _retry?: boolean;
 }
@@ -28,10 +32,10 @@ const axiosClient = axios.create({
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true",
   },
 });
 
-// -------------------- REQUEST INTERCEPTOR --------------------
 axiosClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("access_token");
@@ -43,14 +47,36 @@ axiosClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// -------------------- RESPONSE INTERCEPTOR --------------------
+type ResponseHeaders =
+  | AxiosResponseHeaders
+  | RawAxiosResponseHeaders
+  | undefined;
+
+const saveTokenFromHeaders = (headers: ResponseHeaders): string | null => {
+  const authHeader =
+    typeof headers?.authorization === "string"
+      ? headers.authorization
+      : undefined;
+
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.slice(7);
+    localStorage.setItem("access_token", token);
+    return token;
+  }
+
+  return null;
+};
+
 axiosClient.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    saveTokenFromHeaders(response.headers);
+
+    return response;
+  },
 
   async (error: AxiosError) => {
     const originalRequest = error.config as CustomAxiosRequest;
 
-    // ----------- TOKEN EXPIRED (401) --------------
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {

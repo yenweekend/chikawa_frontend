@@ -22,14 +22,7 @@ export const signUpCredential = async (
     email: formData.email,
   };
   try {
-    // const response = await axiosClient.post("/api/v1/auth/register", payload);
-    const response = await axios.post(
-      "https://fearsome-ollie-correspondently.ngrok-free.dev/api/v1/auth/register",
-      payload,
-      {
-        headers: { "ngrok-skip-browser-warning": "true" },
-      }
-    );
+    const response = await axiosClient.post("/api/v1/auth/register", payload);
 
     return {
       success: true,
@@ -55,23 +48,15 @@ export const loginCredential = async (
   formData: LoginFormData
 ): Promise<ApiResponse<UserData>> => {
   try {
-    const response = await axios.post(
-      "https://fearsome-ollie-correspondently.ngrok-free.dev/api/v1/auth/login",
-      {
-        email: formData.email,
-        password: formData.password,
-      },
-
-      {
-        headers: { "ngrok-skip-browser-warning": "true" },
-      }
-    );
+    const response = await axiosClient.post("/api/v1/auth/login", {
+      email: formData.email,
+      password: formData.password,
+    });
 
     return {
       success: true,
-      data: response.data?.result,
-      message: response.data?.message ?? "Login successful",
-      token: response.headers["authorization"] ?? null,
+      data: response?.data.result,
+      message: response?.data.message ?? "Login successful",
     };
   } catch (error) {
     if (axios.isAxiosError(error)) {

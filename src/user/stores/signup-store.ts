@@ -7,6 +7,7 @@ export interface UserData {
   email?: string | null;
   fullName?: string | null;
   lineId?: string | null;
+  token?: string;
 }
 
 interface UserState {

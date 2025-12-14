@@ -17,6 +17,7 @@ import {
   FormMessage,
   useFormField,
 } from "@/components/ui/form";
+import { RequiredBadge } from "./form-badge";
 
 export interface FormInputProps {
   label?: string;
@@ -69,9 +70,7 @@ const FormInputField = React.forwardRef<HTMLInputElement, FormInputFieldProps>(
               className={cn("text-base leading-3.5 font-", labelClassName)}
             >
               {label}
-              {showRequiredIcon && required && (
-                <p className="text-base text-destructive">Required</p>
-              )}
+              {showRequiredIcon && required && <RequiredBadge />}
               {badge}
             </FormLabel>
           )}

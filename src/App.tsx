@@ -14,6 +14,8 @@ import SearchPage from "@/user/pages/search";
 import LineCallback from "@/user/pages/account/line-callback";
 import { ResetPasswordPage } from "@/user/pages/account/reset-password";
 import { ForgotPasswordPage } from "@/user/pages/account/forgot-password";
+import { AccountManagement } from "@/user/pages/account/account-management";
+import { AddressManagement } from "@/user/pages/account/address-management";
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
 
       <Route element={<LoginPage />} path={PATHS.LOGIN} />
       <Route element={<SignUpPage />} path={PATHS.SIGN_UP} />
+      <Route element={<AccountManagement />} path={PATHS.ACCOUNT} />
+      <Route element={<AddressManagement />} path={PATHS.ADDRESS} />
       <Route element={<ForgotPasswordPage />} path={PATHS.FORGOT_PASSWORD} />
       <Route element={<ResetPasswordPage />} path={PATHS.RESET_PASSWORD} />
 

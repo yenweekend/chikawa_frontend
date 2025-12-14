@@ -40,3 +40,7 @@ const isFieldError = (value: unknown): value is FieldError => {
     typeof (value as Record<string, unknown>).message === "string"
   );
 };
+
+export function numberInputSanitize(input: string): string {
+  return input.replace(/\D/g, "");
+}

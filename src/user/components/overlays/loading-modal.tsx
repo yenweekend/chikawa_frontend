@@ -121,7 +121,7 @@ const LoadingModal = React.forwardRef<
     {
       open,
       onOpenChange,
-      title = "決済処理中...",
+      title = "Logout Processing...",
       description,
       size,
       spinnerSize = "xl",

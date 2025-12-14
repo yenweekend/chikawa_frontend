@@ -213,8 +213,6 @@ export const useProductFilters = (
     updateFiltersFromParams();
   }, [updateFiltersFromParams]);
 
-  // console.log(appliedFilters);
-
   return {
     appliedFilters,
     searchKeyword,

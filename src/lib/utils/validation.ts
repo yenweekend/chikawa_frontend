@@ -3,6 +3,7 @@ export const VALIDATION_REGEX = {
   PASSWORD: /^(?=.*[a-zA-Z])(?=.*\d)[A-Za-z\d!@#$%^&*()]{8,72}$/,
   PASSWORD_UPPERCASE: /[A-Z]/,
   PASSWORD_ALPHANUMERIC: /^[A-Za-z0-9]+$/,
+  PHONE_NUMBER: /^0\d{9,10}$/,
 } as const;
 
 export const ValidationHelpers = {
