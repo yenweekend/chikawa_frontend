@@ -23,6 +23,7 @@ import { LineIcon } from "@/user/components/ui/common-icons";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/utils/auth";
 import { loginCredential } from "@/actions/auth-v1";
+import { Link } from "react-router-dom";
 
 export const LoginPage = () => {
   const [isPending, setIsPending] = useState(false);
@@ -60,6 +61,8 @@ export const LoginPage = () => {
             throw new Error(res.message);
           }
 
+          console.log(res);
+
           const data = res.data;
 
           setUser({
@@ -67,6 +70,7 @@ export const LoginPage = () => {
             email: data?.email,
             fullName: data?.fullName,
             lineId: data?.lineId,
+            role: data?.role,
           });
 
           toast.success("Login successful!");
@@ -79,7 +83,7 @@ export const LoginPage = () => {
         }
       })(event);
     },
-    [form]
+    [form, setUser]
   );
 
   useEffect(() => {
@@ -153,6 +157,11 @@ export const LoginPage = () => {
                 />
               </CardContent>
               <CardFooter className="flex-col gap-2">
+                <div className="flex flex-row w-full justify-end">
+                  <Link to={"/forgot-password"} className="underline">
+                    You forgot password?
+                  </Link>
+                </div>
                 <Button
                   type="submit"
                   className="h-10 px-20 py-5 rounded-full bg-blue-600 text-white mx-auto"

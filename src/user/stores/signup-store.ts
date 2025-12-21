@@ -8,7 +8,10 @@ export interface UserData {
   fullName?: string | null;
   lineId?: string | null;
   token?: string;
+  role?: UserRole;
 }
+
+export type UserRole = "ROLE_customer " | "ROLE_admin";
 
 interface UserState {
   user: UserData | null;

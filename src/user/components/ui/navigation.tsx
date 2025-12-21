@@ -19,7 +19,7 @@ interface NavigationProps {
 export const Navigation = ({ navigation }: NavigationProps) => {
   return (
     <NavigationMenu viewport={false}>
-      <NavigationMenuList>
+      <NavigationMenuList className="flex flex-wrap w-[80%] mx-auto">
         {navigation.map((item, index) =>
           item?.href ? (
             <NavigationMenuItem key={`nav-${index}`}>

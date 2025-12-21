@@ -29,6 +29,8 @@ export const Chatbox = () => {
   });
 
   const handleSendMessage = async (values: z.infer<typeof chatSchema>) => {
+    if (!values.content.trim()) return;
+
     setIsPending(true);
     setThreadId(null);
     const userMessage = {
@@ -37,6 +39,8 @@ export const Chatbox = () => {
       message: values.content,
     };
     setMessages((prev) => [...prev, userMessage]);
+
+    form.reset({ content: "" });
 
     try {
       const res = await fetch("http://localhost:8000/chat", {
@@ -161,6 +165,15 @@ export const Chatbox = () => {
                       {...form.register("content")}
                       placeholder="Enter message..."
                       disabled={isPending}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+
+                          if (isPending) return;
+
+                          form.handleSubmit(handleSendMessage)();
+                        }
+                      }}
                     />
                   </div>
 

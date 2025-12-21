@@ -4,11 +4,21 @@ import { NAVIGATIONS } from "@/user/constants/paths";
 
 import { Navigation } from "@/user/components/ui/navigation";
 import { useUserStore } from "@/user/stores/signup-store";
+import { FormSearchField } from "@/components/ui/search-input";
+import { useState } from "react";
 
 export const Header = () => {
   const navigate = useNavigate();
+
+  const [searchKeyword, setSearchKeyword] = useState<string>("");
   const { user, isAuthenticated } = useUserStore();
   console.log(user, isAuthenticated);
+
+  const handleSearch = (value: string) => {
+    if (!value.trim()) return;
+
+    navigate(`/search?keyword=${encodeURIComponent(value)}`);
+  };
 
   return (
     <>
@@ -30,8 +40,11 @@ export const Header = () => {
               </div>
             </div>
           </div>
-          <div className="basis-1/3 flex items-center justify-center">
-            <div className="w-[300px] ">
+          <div className="basis-1/3 flex items-center justify-center gap-5">
+            <div
+              className="w-[300px] cursor-pointer"
+              onClick={() => navigate("/")}
+            >
               <img
                 src="https://chiikawamarket.jp/cdn/shop/files/logo_chiikawamarket.png?v=1659340705&width=450"
                 className="w-full object-cover"
@@ -39,12 +52,37 @@ export const Header = () => {
             </div>
           </div>
           <div className="basis-1/3 flex items-center gap-2 justify-end">
-            <Link className="w-16 h-16" to={"/account/login"}>
-              <img src="https://chiikawamarket.jp/cdn/shop/files/en_btn_login_112x.png?v=1848369783586275347" />
-            </Link>
-            <Link className="w-16 h-16" to={"/"}>
-              <img src="https://chiikawamarket.jp/cdn/shop/files/en_btn_cart_112x.png?v=8880665500984661040" />
-            </Link>
+            <div className="flex-1 pr-10">
+              <FormSearchField
+                inputProps={{
+                  placeholder: "Search",
+                  value: searchKeyword,
+                }}
+                onDebouncedSearch={(kw) => setSearchKeyword(kw)}
+                className={"w-full"}
+                inputClassName="pl-5 pr-10"
+                iconClassName="right-4"
+                onClick={handleSearch}
+              />
+            </div>
+            {isAuthenticated ? (
+              <Link className="w-16 h-16" to={"/account/profile"}>
+                <img src="https://chiikawamarket.jp/cdn/shop/files/en_btn_login_112x.png?v=1848369783586275347" />
+              </Link>
+            ) : (
+              <Link className="w-16 h-16" to={"/account/login"}>
+                <img src="https://chiikawamarket.jp/cdn/shop/files/en_btn_login_112x.png?v=1848369783586275347" />
+              </Link>
+            )}
+            {isAuthenticated ? (
+              <Link className="w-16 h-16" to={"/cart"}>
+                <img src="https://chiikawamarket.jp/cdn/shop/files/en_btn_cart_112x.png?v=8880665500984661040" />
+              </Link>
+            ) : (
+              <div className="size-16">
+                <img src="https://chiikawamarket.jp/cdn/shop/files/en_btn_cart_112x.png?v=8880665500984661040" />
+              </div>
+            )}
           </div>
         </div>
         <div className="bg-yellow-100 flex items-center justify-center  py-3">

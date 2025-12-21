@@ -17,6 +17,8 @@ export default function LineCallback() {
         const data = await lineCallback(code);
 
         if (data.result.id) {
+          console.log(data.result);
+
           setUser(data.result);
           window.location.href = "/";
         }

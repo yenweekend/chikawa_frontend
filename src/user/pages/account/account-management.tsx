@@ -52,7 +52,9 @@ export const AccountManagement = () => {
         const defaultAddress = response.data.result.addresses.find(
           (item: Address) => item.isDefaultAddress
         );
-        setDefaultAddress(defaultAddress);
+        if (defaultAddress.length !== 0) {
+          setDefaultAddress(defaultAddress);
+        }
       }
     } catch (err) {
       toast.error(getErrorMessage(err));

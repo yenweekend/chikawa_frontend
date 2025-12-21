@@ -15,6 +15,7 @@ interface CounterProps {
   label?: string;
   className?: string;
   disableIncrement?: boolean;
+  disabled: boolean;
 }
 
 export const Counter = ({
@@ -25,6 +26,7 @@ export const Counter = ({
   label = "名",
   className,
   disableIncrement = false,
+  disabled,
 }: CounterProps) => {
   const handleDecrement = () => {
     if (value > min) {
@@ -54,7 +56,7 @@ export const Counter = ({
             ? "border-slate-200 text-slate-200"
             : "border-gray-300 !text-black"
         )}
-        disabled={isDecrementDisabled}
+        disabled={isDecrementDisabled || disabled}
         onClick={handleDecrement}
         aria-label="数量を減らす"
       >
@@ -74,7 +76,7 @@ export const Counter = ({
             ? "border-slate-200 text-slate-200"
             : "border-gray-300 !text-black"
         )}
-        disabled={isIncrementDisabled}
+        disabled={isIncrementDisabled || disabled}
         onClick={handleIncrement}
         aria-label="数量を増やす"
       >

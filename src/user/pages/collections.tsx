@@ -39,15 +39,14 @@ import { Button } from "@/components/ui/button";
 import { getConsolidatedErrors } from "@/lib/utils/form-utils";
 import { FormErrorList } from "@/components/ui/form-error-list";
 import { getSearchAction } from "@/actions/product";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/utils/auth";
 import ProductCard from "@/user/components/ui/product-card";
 import { Pagination } from "@/components/ui/pagination";
 import { Loading } from "@/user/components/ui/loading";
-import { FormSearchField } from "@/components/ui/search-input";
 
-const SearchPage = () => {
+const CollectionPage = () => {
   const [data, setData] = useState<
     {
       id: string;
@@ -60,6 +59,8 @@ const SearchPage = () => {
     }[]
   >([]);
 
+  const { slug } = useParams();
+
   const [isPending, setIsPending] = useState<boolean>(false);
   const [totalPage, setTotalPage] = useState<number>(0);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
@@ -71,6 +72,7 @@ const SearchPage = () => {
   const currentPage = Number(searchParams.get("page") ?? 1);
 
   const fetchSearchData = useCallback(async () => {
+    const fixSlug = slug?.includes("_") ? slug.replace(/_/g, "-") : slug;
     try {
       const params: ProductSearchParams = {
         characters: JSON.parse(searchParams.get("characters") || "[]"),
@@ -83,7 +85,7 @@ const SearchPage = () => {
           : undefined,
         status: searchParams.get("status") || undefined,
         page: Number(searchParams.get("page") || 1),
-        q: searchParams.get("keyword")?.trim() ?? undefined,
+        q: fixSlug ?? "",
         sortOrder:
           (searchParams.get("sortOrder") as ProductSearchParams["sortOrder"]) ||
           "desc",
@@ -105,7 +107,7 @@ const SearchPage = () => {
     } finally {
       setIsPending(false);
     }
-  }, [searchParams]);
+  }, [searchParams, slug]);
   const {
     categoryOptions,
     characterOptions,
@@ -115,8 +117,6 @@ const SearchPage = () => {
     filters,
     resetFilters,
     removeFilter,
-    searchKeyword,
-    applySearch,
   } = useProductFilters(categories, characters);
 
   const [localFilters, setLocalFilters] =
@@ -215,25 +215,9 @@ const SearchPage = () => {
     "maxPrice",
   ]);
 
-  if (isPending) return <Loading />;
-
   return (
     <MainLayout className="mx-auto max-w-[90%] w-[90%]">
-      <Typography className="text-center text-2xl uppercase py-10 ">
-        Search results
-      </Typography>
-      <div className="flex items-center justify-center mb-8 relative w-[740px] mx-auto">
-        <FormSearchField
-          inputProps={{
-            placeholder: "Search",
-            value: searchKeyword,
-          }}
-          onDebouncedSearch={(kw) => applySearch(kw)}
-          className={"w-full"}
-          inputClassName="left-4"
-          iconClassName="pl-3"
-        />
-      </div>
+      <Typography className="text-center text-2xl uppercase py-10 "></Typography>
       <div className="flex items-start gap-10">
         <div className="shrink-0 w-[300px] bg-[#fff0f0] rounded-lg">
           <CommonFilterSheet
@@ -344,30 +328,36 @@ const SearchPage = () => {
             </div>
           </CommonFilterSheet>
         </div>
-        <div className="space-y-10">
-          <div className="grid grid-cols-4 gap-4 ">
-            {data.map((item) => (
-              <ProductCard
-                key={item.id}
-                title={item.name}
-                imgUrl={item.images[0]}
-                price={item.price}
-                href={`/products/${item.id}`}
-                className="border"
-              />
-            ))}
-          </div>
-          <div className="flex items-center justify-center">
-            <Pagination
-              currentPage={currentPage}
-              onPageChange={handlePageChange}
-              totalPages={totalPage}
-            />
-          </div>
-        </div>
+        {isPending ? (
+          <Loading className="flex-1 w-full" />
+        ) : (
+          <>
+            <div className="space-y-10">
+              <div className="grid grid-cols-4 gap-4 ">
+                {data.map((item) => (
+                  <ProductCard
+                    key={item.id}
+                    title={item.name}
+                    imgUrl={item.images[0]}
+                    price={item.price}
+                    href={`/products/${item.id}`}
+                    className="border"
+                  />
+                ))}
+              </div>
+              <div className="flex items-center justify-center">
+                <Pagination
+                  currentPage={currentPage}
+                  onPageChange={handlePageChange}
+                  totalPages={totalPage}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </MainLayout>
   );
 };
 
-export default SearchPage;
+export default CollectionPage;

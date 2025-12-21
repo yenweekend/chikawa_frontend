@@ -53,6 +53,8 @@ export const loginCredential = async (
       password: formData.password,
     });
 
+    console.log(response.data);
+
     return {
       success: true,
       data: response?.data.result,

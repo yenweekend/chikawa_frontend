@@ -70,6 +70,7 @@ const saveTokenFromHeaders = (headers: ResponseHeaders): string | null => {
 axiosClient.interceptors.response.use(
   (response) => {
     saveTokenFromHeaders(response.headers);
+    console.log(response);
 
     return response;
   },

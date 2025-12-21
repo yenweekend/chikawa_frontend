@@ -11,21 +11,24 @@ import { Button } from "@/components/ui/button";
 import { PRODUCTS_DATA } from "@/user/constants/fakeData";
 import { ProductSection } from "@/user/features/products/product-section";
 import type { Product } from "@/user/types/products";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/utils/auth";
 import { getProductDetailAction } from "@/actions/product";
 import { Counter } from "@/user/components/ui/counter";
 import { DoorOpen } from "lucide-react";
 import { Loading } from "@/user/components/ui/loading";
+import { addToCart } from "@/actions/cart";
 
 export const ProductDetail = () => {
   const [quantity, setQuantity] = useState<number>(1);
   const [currentIdx, setCurrentIdx] = useState<number>(0);
   const [images, setImages] = useState<string[]>([]);
-  const [productDetail, setProductDetail] = useState<Product>(null);
+  const [productDetail, setProductDetail] = useState<Product | null>(null);
   const [isPending, setIsPending] = useState<boolean>(false);
+  const [isPendingCart, setIsPendingCart] = useState<boolean>(false);
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const swiperRef = useRef<SwiperRef | null>(null);
 
@@ -45,14 +48,32 @@ export const ProductDetail = () => {
     }
   }, [id]);
 
+  const handleAddToCart = useCallback(async () => {
+    setIsPendingCart(true);
+    try {
+      const response = await addToCart({
+        id: productDetail?.id ?? "",
+        quantity: quantity,
+      });
+      if (response.success) {
+        toast.success(response.message);
+        setTimeout(() => {
+          navigate("/cart");
+        }, 500);
+      }
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    } finally {
+      setIsPendingCart(false);
+    }
+  }, [productDetail?.id, quantity]);
+
   useEffect(() => {
     if (!id) return;
     fetchProductDetail();
   }, [fetchProductDetail, id]);
 
   const handleQuantityChange = (newQuantity: number) => {
-    // setPlanOptionQuantity(option.id.toString(), newQuantity);
-    console.log(newQuantity);
     setQuantity(newQuantity);
   };
 
@@ -210,11 +231,14 @@ export const ProductDetail = () => {
                   max={99}
                   label=""
                   className="items-start mt-2 w-full"
+                  disabled={false}
                 />
                 <Button
                   variant="outline"
                   type="button"
                   className="uppercase w-full h-14"
+                  disabled={isPendingCart}
+                  onClick={handleAddToCart}
                 >
                   Add to cart
                 </Button>

@@ -96,7 +96,7 @@ export const ResetPasswordPage = () => {
                   <Typography className="font-inter text-primary text-2xl font-extrabold">
                     Reset Password
                   </Typography>
-                  <p className="text-muted-foreground mt-3 whitespace-nowrap">
+                  <p className="text-muted-foreground mt-3">
                     Your new password must be different from your current
                     password.
                   </p>

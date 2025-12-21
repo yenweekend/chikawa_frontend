@@ -52,7 +52,8 @@ export const ForgotPasswordPage = () => {
           if (!res.success) {
             throw new Error(res.message);
           }
-          toast.success("Please go to your gmail to reset password!");
+          // toast.success("Please go to your gmail to reset password!");
+          window.location.replace("/forgot-password/successs");
         } catch (err) {
           toast.error(getErrorMessage(err));
         } finally {

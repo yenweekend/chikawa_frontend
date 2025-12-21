@@ -20,7 +20,6 @@ const ProductCard = ({
   price = 0,
   href = "#",
   imgUrl = "https://via.placeholder.com/300x300?text=No+Image",
-  status = "availabel",
 }: ProductCardProps) => {
   return (
     <div
@@ -30,10 +29,6 @@ const ProductCard = ({
       )}
     >
       <div className="bg-white p-2 h-full flex flex-col ">
-        {status === "sold_out"}
-        <div className="absolute bg-black px-3 py-2 rounded-br-2xl text-white top-0 left-0">
-          Sold Out
-        </div>
         <div className="group flex  justify-center items-center overflow-hidden rounded-lg h-100  ">
           {imgUrl ? (
             <img

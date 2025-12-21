@@ -10,7 +10,7 @@ export type Product = {
   variants: Variant[];
   categories: Category[];
   characters: Character[];
-} | null;
+};
 
 export interface Category {
   name: string;
