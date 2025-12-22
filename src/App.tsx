@@ -27,6 +27,12 @@ import CollectionPage from "./user/pages/collections";
 import { RequireAuth } from "./components/guard/require-auth";
 import { RequireGuest } from "./components/guard/require-guest";
 
+import { ChatbotDashboard } from "@/dashboard/chatbot";
+import { UserDashBoard } from "@/dashboard/user";
+import { ProductDashBoard } from "@/dashboard/products";
+import { MainDashBoard } from "@/dashboard/main-dashboard";
+import { OrderDashBoard } from "@/dashboard/orders";
+import { PromotionsDashBoard } from "@/dashboard/promotions";
 function App() {
   return (
     <Routes>
@@ -67,6 +73,15 @@ function App() {
       {/* PROTECT ROUTES */}
 
       <Route element={<NotFound />} path="*"></Route>
+
+      <Route element={<ChatbotDashboard />} path="/dashboard/chatbot" />
+      <Route element={<UserDashBoard />} path="/dashboard/users" />
+      <Route element={<ProductDashBoard />} path="/dashboard/products" />
+      <Route element={<MainDashBoard />} path="/dashboard/main" />
+      <Route element={<OrderDashBoard />} path="/dashboard/orders" />
+      <Route element={<PromotionsDashBoard />} path="/dashboard/promotions" />
+      
+      <Route element={<NotFound />} path="/*"></Route>
     </Routes>
   );
 }
