@@ -24,9 +24,11 @@ import {
   ChevronLeft,
   ChevronRight,
   FilterX,
-  Check
+  Check,
+  Eye
 } from "lucide-react";
-import { MainLayout } from "./layouts/main-layout"; 
+import { MainLayout } from "../dashboard/layouts/main-layout";
+
 
 // --- CONSTANTS DATA ---
 const CHARACTERS_DATA = [
@@ -118,6 +120,147 @@ const CATEGORIES_DATA = [
     { "name": "Food", "slug": "foods" }
 ];
 
+// --- Product Detail Modal ---
+const ProductDetailModal = ({ isOpen, onClose, product }) => {
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  useEffect(() => {
+    if (isOpen && product && product.images && product.images.length > 0) {
+      setSelectedImage(product.images[0]);
+    } else {
+      setSelectedImage(null);
+    }
+  }, [isOpen, product]);
+
+  if (!isOpen || !product) return null;
+
+  const formatPrice = (amount) => {
+    return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(amount);
+  };
+
+  const displayImage = selectedImage || (product.images && product.images.length > 0 ? product.images[0] : null);
+  const isAvailable = product.status === 'available';
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 rounded-t-xl">
+          <h3 className="text-lg font-bold text-gray-900 flex items-center">
+            <Package className="mr-2 text-indigo-600" size={20} /> 
+            Product Details
+          </h3>
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="p-6 overflow-y-auto custom-scrollbar">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Images Section */}
+                <div className="space-y-4">
+                    <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border border-slate-200 relative group">
+                        {displayImage ? (
+                            <img src={displayImage} alt={product.name} className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="text-gray-400 flex flex-col items-center">
+                                <ImageIcon size={48} className="opacity-50 mb-2"/>
+                                <span className="text-sm">No Image</span>
+                            </div>
+                        )}
+                        <div className="absolute top-3 right-3">
+                             <span className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wide border shadow-sm ${
+                                 isAvailable ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-red-100 text-red-700 border-red-200'
+                             }`}>
+                                 {isAvailable ? 'Available' : 'Sold Out'}
+                             </span>
+                        </div>
+                    </div>
+                    {/* Thumbnail list */}
+                    {product.images && product.images.length > 1 && (
+                        <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                             {product.images.map((img, idx) => (
+                                 <div 
+                                    key={idx} 
+                                    onClick={() => setSelectedImage(img)}
+                                    className={`w-20 h-20 flex-shrink-0 border rounded-md overflow-hidden cursor-pointer transition-all ${selectedImage === img ? 'ring-2 ring-indigo-500 ring-offset-1 border-indigo-500' : 'border-slate-200 hover:border-indigo-300'}`}
+                                 >
+                                     <img src={img} alt={`Thumbnail ${idx}`} className="w-full h-full object-cover" />
+                                 </div>
+                             ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Details Section */}
+                <div className="space-y-6">
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h2>
+                        <div className="flex flex-wrap gap-2 text-sm">
+                             <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-medium border border-indigo-100 flex items-center">
+                                <Smile size={14} className="mr-1.5"/>
+                                {product.character}
+                             </span>
+                             <span className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full font-medium border border-slate-200 flex items-center">
+                                <Tag size={14} className="mr-1.5"/>
+                                {product.category}
+                             </span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-6 border-y border-slate-100 py-6">
+                         <div>
+                             <p className="text-xs text-slate-500 uppercase tracking-wide font-bold mb-1">Price</p>
+                             <p className="text-2xl font-bold text-indigo-600">{formatPrice(product.price_raw)}</p>
+                         </div>
+                         <div className="h-10 w-px bg-slate-200"></div>
+                         <div>
+                             <p className="text-xs text-slate-500 uppercase tracking-wide font-bold mb-1">Sold</p>
+                             <p className="text-2xl font-bold text-slate-900">{product.sold}</p>
+                         </div>
+                         <div className="h-10 w-px bg-slate-200"></div>
+                         <div>
+                             <p className="text-xs text-slate-500 uppercase tracking-wide font-bold mb-1">Stock</p>
+                             <p className="text-2xl font-bold text-slate-900">{product.stock}</p>
+                         </div>
+                    </div>
+
+                    <div>
+                        <h4 className="text-sm font-bold text-slate-900 mb-2">Description</h4>
+                        <div className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap bg-slate-50 p-4 rounded-lg border border-slate-100 max-h-40 overflow-y-auto custom-scrollbar">
+                            {product.description || "No description available."}
+                        </div>
+                    </div>
+
+                    <div>
+                         <h4 className="text-sm font-bold text-slate-900 mb-3">Additional Info</h4>
+                         <div className="grid grid-cols-2 gap-4">
+                             <div className="bg-white border border-slate-200 rounded-lg p-3">
+                                 <p className="text-xs text-slate-400 uppercase font-semibold mb-1">Vendor</p>
+                                 <p className="text-sm font-medium text-slate-800">{product.vendor || 'Chiikawa Official'}</p>
+                             </div>
+                             <div className="bg-white border border-slate-200 rounded-lg p-3">
+                                 <p className="text-xs text-slate-400 uppercase font-semibold mb-1">ID</p>
+                                 <p className="text-sm font-medium text-slate-800 font-mono">{product.id}</p>
+                             </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-gray-100 flex justify-end bg-gray-50/50 rounded-b-xl">
+           <button onClick={onClose} className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium transition-all shadow-sm">
+              Close
+           </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /**
  * --- PROGRESS MODAL (Used for Save & Delete) ---
  */
@@ -198,15 +341,15 @@ const ProductFormModal = ({ isOpen, onClose, onSave, initialData }) => {
       if (initialData) {
         setFormData({
           name: initialData.name,
-          description: "Sample description for " + initialData.name,
-          price: "1250000",
+          description: initialData.description || "Sample description for " + initialData.name,
+          price: initialData.price_raw || "0", // Use raw price if available
           status: "Active",
           vendor: "Chiikawa Official"
         });
-        setImages(["https://example.com/image1.jpg"]);
+        setImages(initialData.images && initialData.images.length > 0 ? initialData.images : ["https://example.com/image1.jpg"]);
         setVariants([{ name: "Standard", img: "" }]);
-        setCategories([{ name: initialData.category, slug: initialData.category_slug || "nuigurumi" }]);
-        setCharacters([{ name: initialData.character, slug: initialData.character_slug || "chiikawa" }]);
+        setCategories([{ name: initialData.category, slug: initialData.category_slug || "" }]);
+        setCharacters([{ name: initialData.character, slug: initialData.character_slug || "" }]);
       } else {
         setFormData({ name: "", description: "", price: "", status: "Active", vendor: "" });
         setImages([""]); 
@@ -273,7 +416,15 @@ const ProductFormModal = ({ isOpen, onClose, onSave, initialData }) => {
 
   const handleSubmit = () => {
     if (validateForm()) {
-      onSave(formData.name || "New Product");
+        // Collect all data to pass to onSave
+        const fullData = {
+            ...formData,
+            images,
+            variants,
+            categories,
+            characters
+        };
+      onSave(fullData);
     }
   };
 
@@ -352,7 +503,7 @@ const ProductFormModal = ({ isOpen, onClose, onSave, initialData }) => {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">Description</label>
-                  <textarea rows={3} className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" placeholder="Product details..." />
+                  <textarea rows={3} value={formData.description || ""} onChange={(e) => setFormData({...formData, description: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" placeholder="Product details..." />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -493,6 +644,10 @@ const ProductFormModal = ({ isOpen, onClose, onSave, initialData }) => {
 };
 
 export const ProductDashBoard = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false); 
   const [isProcessing, setIsProcessing] = useState(false); 
@@ -501,48 +656,92 @@ export const ProductDashBoard = () => {
   const [selectedProduct, setSelectedProduct] = useState(null); 
   const [processProductName, setProcessProductName] = useState("");
 
+  // New State for View Detail Modal
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [viewProduct, setViewProduct] = useState(null);
+
   const [searchQuery, setSearchQuery] = useState("");
-  // --- CHANGED: filterCharacter now stores an array of slugs for multi-selection ---
   const [filterCharacter, setFilterCharacter] = useState([]); 
   const [filterCategory, setFilterCategory] = useState(null); 
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  const generateProducts = () => {
-    const baseProducts = [
-      { id: 1, name: "Chiikawa Standard Plush S", character: "Chiikawa", character_slug: "chiikawa", category: "Plush", category_slug: "nuigurumi", sold: 44, stock: 200, revenue: "1,320,000 VND", imageColor: "bg-pink-100" },
-      { id: 2, name: "Hachiware Talking Doll", character: "Hachiware", character_slug: "hachiware", category: "Toy", category_slug: "toys", sold: 12, stock: 50, revenue: "5,400,000 VND", imageColor: "bg-blue-100" },
-      { id: 3, name: "Usagi Screaming Keyring", character: "Usagi", character_slug: "usagi", category: "Key ring", category_slug: "keyholder", sold: 89, stock: 300, revenue: "2,670,000 VND", imageColor: "bg-yellow-100" },
-      { id: 4, name: "Momonga Flying figure", character: "Momonga", character_slug: "momonga", category: "Figure", category_slug: "figure", sold: 5, stock: 100, revenue: "1,250,000 VND", imageColor: "bg-cyan-100" },
-      { id: 5, name: "Kurimanju Sake Cup", character: "Kurimanju", character_slug: "kurimanju", category: "Cups", category_slug: "cups", sold: 15, stock: 100, revenue: "750,000 VND", imageColor: "bg-orange-100" },
-      { id: 6, name: "Shisa Okinawa Set", character: "Shisa", character_slug: "shisa", category: "Goods", category_slug: "goods", sold: 0, stock: 50, revenue: "0 VND", imageColor: "bg-red-100" },
-      { id: 7, name: "Rakko Teacher Plush", character: "Rakko", character_slug: "rakko", category: "Plush", category_slug: "nuigurumi", sold: 30, stock: 150, revenue: "1,500,000 VND", imageColor: "bg-orange-50" },
-      { id: 8, name: "Kani Headband", character: "Kani", character_slug: "furuhonya", category: "Hair accessories", category_slug: "hair", sold: 120, stock: 500, revenue: "3,600,000 VND", imageColor: "bg-pink-50" },
-      { id: 9, name: "Chiikawa Pajama Ver", character: "Chiikawa", character_slug: "chiikawa", category: "Plush", category_slug: "nuigurumi", sold: 22, stock: 100, revenue: "1,100,000 VND", imageColor: "bg-pink-100" },
-      { id: 10, name: "Hachiware Camera", character: "Hachiware", character_slug: "hachiware", category: "Toy", category_slug: "toys", sold: 5, stock: 20, revenue: "2,500,000 VND", imageColor: "bg-blue-100" },
-      { id: 11, name: "Yoroi-san Bag", character: "Yoroi-san", character_slug: "yoroisan", category: "Bag", category_slug: "bags", sold: 2, stock: 30, revenue: "800,000 VND", imageColor: "bg-gray-100" },
-      { id: 12, name: "Beetle Sticker", character: "Beetle", character_slug: "beetle", category: "Sticker", category_slug: "stickers_tapes", sold: 200, stock: 1000, revenue: "5,000,000 VND", imageColor: "bg-green-100" },
-    ];
-    return baseProducts;
+  // --- API CONNECTION ---
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("https://fearsome-ollie-correspondently.ngrok-free.dev/api/v1/products/all", {
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch products");
+      }
+
+      const data = await response.json();
+
+      if (data.code === 0 && Array.isArray(data.result)) {
+        // Map API data to Dashboard format
+        const mappedProducts = data.result.map(p => {
+          // Handle arrays for characters and categories
+          const mainChar = p.characters && p.characters.length > 0 ? p.characters[0] : null;
+          const mainCat = p.categories && p.categories.length > 0 ? p.categories[0] : null;
+
+          return {
+            id: p.id,
+            name: p.name,
+            character: mainChar ? mainChar.name : "Unknown",
+            character_slug: mainChar ? mainChar.slug : "unknown",
+            category: mainCat ? mainCat.name : "Uncategorized",
+            category_slug: mainCat ? mainCat.slug : "uncategorized",
+            // Store full arrays
+            characters: p.characters || [],
+            categories: p.categories || [],
+            sold: p.sold || 0,
+            stock: p.stock || 0,
+            price_raw: p.price, 
+            status: p.status || "unavailable", 
+            revenue: formatPrice(Math.round((p.sold || 0) * (p.price || 0))),
+            imageColor: "bg-gray-100", 
+            images: p.images || [], 
+            description: p.description,
+            vendor: p.vendor
+          };
+        });
+        setProducts(mappedProducts);
+      }
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const [products, setProducts] = useState(generateProducts());
+  const formatPrice = (amount) => {
+    return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(amount);
+  };
 
-  // --- UPDATED FILTER LOGIC FOR MULTI-SELECT ---
   const toggleCharacterFilter = (slug) => {
     setFilterCharacter(prev => {
       if (prev.includes(slug)) {
-        return prev.filter(s => s !== slug); // Remove if exists
+        return prev.filter(s => s !== slug); 
       } else {
-        return [...prev, slug]; // Add if not exists
+        return [...prev, slug]; 
       }
     });
   };
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    // Multi-select logic: if array empty, match all. Else, check if slug is in array.
     const matchesCharacter = filterCharacter.length === 0 ? true : filterCharacter.includes(product.character_slug);
     const matchesCategory = filterCategory ? product.category_slug === filterCategory : true;
     return matchesSearch && matchesCharacter && matchesCategory;
@@ -576,50 +775,149 @@ export const ProductDashBoard = () => {
     setIsFormModalOpen(true);
   };
 
-  const handleConfirmDelete = () => {
+  const handleViewClick = (product) => {
+    setViewProduct(product);
+    setIsViewModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
     const name = selectedProduct?.name;
     setIsDeleteModalOpen(false);
     setProcessProductName(name);
     setProcessAction('deleting');
     setIsProcessing(true);
 
-    setTimeout(() => {
-      setProducts(prev => prev.filter(p => p.id !== selectedProduct.id));
-      setIsProcessing(false);
-      setSelectedProduct(null);
-    }, 1500);
+    try {
+        const response = await fetch(`https://fearsome-ollie-correspondently.ngrok-free.dev/api/v1/products/${selectedProduct.id}`, {
+            method: "DELETE",
+            headers: {
+                "ngrok-skip-browser-warning": "true",
+                "Content-Type": "application/json",
+            }
+        });
+
+        if (response.ok) {
+            // Success
+            setProducts(prev => prev.filter(p => p.id !== selectedProduct.id));
+        } else {
+            console.error("Failed to delete product");
+        }
+    } catch (e) {
+        console.error("Error deleting product:", e);
+    } finally {
+        setIsProcessing(false);
+        setSelectedProduct(null);
+    }
   };
 
-  const handleSaveProduct = (productName) => {
+  const handleSaveProduct = async (formData) => {
     setIsFormModalOpen(false);
-    setProcessProductName(productName);
+    setProcessProductName(formData.name);
     setProcessAction('saving');
     setIsProcessing(true);
 
-    setTimeout(() => {
-      if (!selectedProduct) {
-         const newProduct = {
-            id: products.length + 1,
-            name: productName,
-            character: "Unknown",
-            character_slug: "unknown",
-            category: "Uncategorized",
-            category_slug: "uncategorized",
-            sold: 0,
-            stock: 0,
-            revenue: "0 VND",
-            imageColor: "bg-gray-100"
-         };
-         setProducts([newProduct, ...products]);
+    try {
+        // Construct payload
+        const payload = {
+            name: formData.name,
+            description: formData.description,
+            price: parseFloat(formData.price),
+            status: formData.status,
+            vendor: formData.vendor, // Added vendor to payload
+            images: formData.images,
+            variants: formData.variants, // Added variants to payload
+            categories: formData.categories, // Added categories to payload
+            characters: formData.characters // Added characters to payload
+        };
+
+        let response;
+        if (selectedProduct) {
+            // UPDATE
+            response = await fetch(`https://fearsome-ollie-correspondently.ngrok-free.dev/api/v1/products/${selectedProduct.id}`, {
+                method: "PUT",
+                headers: {
+                    "ngrok-skip-browser-warning": "true",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload)
+            });
+        } else {
+            // CREATE
+            response = await fetch("https://fearsome-ollie-correspondently.ngrok-free.dev/api/v1/products", {
+                method: "POST",
+                headers: {
+                    "ngrok-skip-browser-warning": "true",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload)
+            });
+        }
+
+        if (response.ok) {
+            fetchProducts(); // Refresh list
+        } else {
+            console.error("Failed to save product");
+        }
+    } catch (e) {
+        console.error("Error saving product:", e);
+    } finally {
+        setIsProcessing(false);
+        setSelectedProduct(null);
+    }
+  };
+
+  const renderPagination = () => {
+    const pages = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      // Always add 1
+      pages.push(1);
+
+      if (currentPage > 3) pages.push('...');
+
+      // Range around current
+      let start = Math.max(2, currentPage - 1);
+      let end = Math.min(totalPages - 1, currentPage + 1);
+
+      if (currentPage <= 3) {
+          start = 2;
+          end = 4;
       }
-      setIsProcessing(false);
-      setSelectedProduct(null);
-    }, 2000);
+      if (currentPage >= totalPages - 2) {
+          start = totalPages - 3;
+          end = totalPages - 1;
+      }
+
+      for (let i = start; i <= end; i++) {
+          pages.push(i);
+      }
+
+      if (currentPage < totalPages - 2) pages.push('...');
+
+      // Always add last
+      pages.push(totalPages);
+    }
+    
+    return pages.map((page, index) => {
+        if (page === '...') {
+            return <span key={`ellipsis-${index}`} className="px-2 text-slate-400">...</span>;
+        }
+        return (
+          <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${currentPage === page ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'}`}
+          >
+              {page}
+          </button>
+        );
+    });
   };
 
   return (
     <MainLayout>
-    <div className="space-y-6 animate-fade-in pb-10">
+    <div className="space-y-6 animate-fade-in pb-10 p-6">
       
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -627,17 +925,8 @@ export const ProductDashBoard = () => {
           <p className="text-slate-500 mt-1">Manage list of Chiikawa products</p>
         </div>
         
+        {/* Only Create Button Here */}
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          <div className="relative group flex-1 md:flex-none">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-            <input 
-              type="text" 
-              placeholder="Search products..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full md:w-64 pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" 
-            />
-          </div>
           <button onClick={handleCreateClick} className="flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-all shadow-sm shadow-indigo-200">
             <Plus size={16} className="mr-2" /> Create Product
           </button>
@@ -646,7 +935,7 @@ export const ProductDashBoard = () => {
 
       <div className="space-y-4">
         <div className="flex flex-col md:flex-row gap-4">
-            {/* --- UPDATED CHARACTER FILTER --- */}
+            {/* Character Filter */}
             <div className="flex-1 min-w-0 bg-white p-4 rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="flex items-center justify-between mb-3">
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center">
@@ -658,7 +947,6 @@ export const ProductDashBoard = () => {
                          </button>
                     )}
                 </div>
-                {/* Changed pb-2 to p-2 for padding all sides */}
                 <div className="flex gap-3 overflow-x-auto p-2 custom-scrollbar snap-x">
                     <button 
                         onClick={() => setFilterCharacter([])}
@@ -675,7 +963,6 @@ export const ProductDashBoard = () => {
                               onClick={() => toggleCharacterFilter(char.slug)}
                               className={`snap-start flex-shrink-0 flex flex-col items-center gap-1 min-w-[80px] p-1 rounded-lg transition-all relative ${isSelected ? 'bg-indigo-50 ring-2 ring-indigo-500 ring-offset-1' : 'hover:bg-slate-50 border border-transparent hover:border-slate-200'}`}
                           >
-                              {/* Increased image size w-14 h-14, reduced button padding to p-1 */}
                               <img src={char.image} alt={char.name} className="w-14 h-14 rounded-full object-cover bg-white border border-slate-100 shadow-sm" />
                               <span className="text-[10px] font-medium text-slate-600 truncate max-w-full">{char.name}</span>
                               {isSelected && (
@@ -689,7 +976,7 @@ export const ProductDashBoard = () => {
                 </div>
             </div>
 
-            {/* --- UPDATED CATEGORY FILTER --- */}
+            {/* Category Filter */}
             <div className="w-full md:w-72 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col">
                 <div className="flex items-center justify-between mb-3">
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center">
@@ -702,7 +989,6 @@ export const ProductDashBoard = () => {
                     )}
                 </div>
                 <div className="relative flex-1">
-                    {/* REMOVED FILTER ICON and CHANGED pl-10 to pl-3 */}
                     <select 
                         value={filterCategory || ""}
                         onChange={(e) => setFilterCategory(e.target.value || null)}
@@ -719,13 +1005,54 @@ export const ProductDashBoard = () => {
                 </div>
             </div>
         </div>
+
+        {/* --- SEARCH SECTION (MOVED HERE) --- */}
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+             <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input 
+                  type="text" 
+                  placeholder="Search products by name..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" 
+                />
+             </div>
+             <button className="flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-all shadow-sm">
+                <Search size={16} className="mr-2" /> Search
+             </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {currentProducts.map((product) => (
+        {loading ? (
+             <div className="col-span-full py-20 flex flex-col items-center justify-center text-slate-400">
+                <Loader2 className="w-10 h-10 animate-spin text-indigo-500 mb-3" />
+                <p>Loading products...</p>
+             </div>
+        ) : (
+        <>
+        {currentProducts.map((product) => {
+            const isAvailable = product.status === 'available';
+            return (
           <div key={product.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow group relative flex flex-col">
             <div className={`h-48 ${product.imageColor} relative flex items-center justify-center group-hover:opacity-95 transition-opacity`}>
+              
+              {/* Status Badge */}
+              <div className="absolute top-3 left-3 z-10">
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wide border shadow-sm ${
+                    isAvailable 
+                    ? 'bg-emerald-100 text-emerald-700 border-emerald-200' 
+                    : 'bg-red-100 text-red-700 border-red-200'
+                }`}>
+                    {isAvailable ? 'In Stock' : 'Out of Stock'}
+                </span>
+              </div>
+
               <div className="absolute top-3 right-3 flex gap-2 z-10">
+                <button onClick={() => handleViewClick(product)} className="w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-slate-600 shadow-sm hover:bg-slate-600 hover:text-white transition-all transform hover:scale-105" title="View Details">
+                  <Eye size={14} />
+                </button>
                 <button onClick={() => handleEditClick(product)} className="w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-indigo-600 shadow-sm hover:bg-indigo-600 hover:text-white transition-all transform hover:scale-105" title="Edit Product">
                   <Edit size={14} />
                 </button>
@@ -734,7 +1061,11 @@ export const ProductDashBoard = () => {
                 </button>
               </div>
               <div className="text-slate-400 flex flex-col items-center">
-                 <Package size={48} className="opacity-50" />
+                 {product.images && product.images.length > 0 && product.images[0] ? (
+                    <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
+                 ) : (
+                    <Package size={48} className="opacity-50" />
+                 )}
               </div>
             </div>
 
@@ -752,14 +1083,14 @@ export const ProductDashBoard = () => {
                    <p className="text-sm font-semibold text-slate-700">{product.sold} <span className="text-slate-400 font-normal">/ {product.stock}</span></p>
                 </div>
                 <div className="text-right">
-                   <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-0.5">Revenue</p>
-                   <p className="text-sm font-bold text-slate-900">{product.revenue}</p>
+                   <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-0.5">Price</p>
+                   <p className="text-sm font-bold text-slate-900">{formatPrice(product.price_raw)}</p>
                 </div>
               </div>
             </div>
           </div>
-        ))}
-        {currentProducts.length === 0 && (
+        )})}
+        {currentProducts.length === 0 && !error && (
           <div className="col-span-full py-12 flex flex-col items-center justify-center text-slate-400">
              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
                 <Search size={32} />
@@ -776,6 +1107,8 @@ export const ProductDashBoard = () => {
              )}
           </div>
         )}
+        </>
+        )}
       </div>
 
       {totalPages > 1 && (
@@ -789,15 +1122,7 @@ export const ProductDashBoard = () => {
            </button>
            
            <div className="flex items-center gap-1">
-             {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => handlePageChange(i + 1)}
-                  className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${currentPage === i + 1 ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'}`}
-                >
-                  {i + 1}
-                </button>
-             ))}
+             {renderPagination()}
            </div>
 
            <button 
@@ -825,6 +1150,12 @@ export const ProductDashBoard = () => {
         onClose={() => setIsFormModalOpen(false)}
         onSave={handleSaveProduct}
         initialData={selectedProduct}
+      />
+      
+      <ProductDetailModal
+         isOpen={isViewModalOpen}
+         onClose={() => setIsViewModalOpen(false)}
+         product={viewProduct}
       />
 
       <ProcessProgressModal 

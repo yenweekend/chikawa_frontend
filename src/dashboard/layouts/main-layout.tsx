@@ -124,14 +124,6 @@ export const MainLayout = ({ children }) => {
               )}
             </NavLink>
 
-            <NavLink to="/dashboard/settings" className={menuClass}>
-              {({ isActive }) => (
-                <>
-                  <Settings size={20} className={iconClass(isActive)} />
-                  <span>Settings</span>
-                </>
-              )}
-            </NavLink>
           </nav>
         </aside>
 
