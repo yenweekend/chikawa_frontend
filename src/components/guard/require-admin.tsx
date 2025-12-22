@@ -5,7 +5,7 @@ export const RequireAdmin = () => {
   const { isAuthenticated, isAdmin } = useAuth();
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/account/login" replace />;
   }
 
   if (!isAdmin) {

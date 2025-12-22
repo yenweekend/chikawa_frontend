@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { MainLayout } from "@/user/layouts/main-layout";
 import { CartRow } from "../features/products/cart-row";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Typography } from "@/components/ui/typography";
 import { cn, formatPrice } from "@/lib/utils/form-utils";
 import { Button } from "@/components/ui/button";
@@ -73,6 +73,18 @@ export const CartPage = () => {
 
   const hasSelected = selectedIds.length > 0;
 
+  const totalPrice = useMemo(() => {
+    const result = rows.filter((item) => selectedIds.includes(item.id));
+
+    if (result.length > 0) {
+      return result.reduce((init, value) => {
+        return init + value.price * value.quantity;
+      }, 0);
+    }
+
+    return 0;
+  }, [selectedIds, rows]);
+
   useEffect(() => {
     fetchCart();
   }, [fetchCart]);
@@ -124,7 +136,7 @@ export const CartPage = () => {
           <div className="">
             <p>Estimated total</p>
             <Typography variant="medium-large" className="text-xl ">
-              ¥{formatPrice(30000)}
+              ¥{formatPrice(totalPrice)}
             </Typography>
           </div>
           .

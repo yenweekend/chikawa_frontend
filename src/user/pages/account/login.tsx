@@ -74,6 +74,10 @@ export const LoginPage = () => {
           });
 
           toast.success("Login successful!");
+          if (data?.role === "ROLE_admin") {
+            window.location.href = "/dashboard/main";
+            return;
+          }
 
           window.location.href = "/";
         } catch (err) {

@@ -72,16 +72,14 @@ function App() {
 
       {/* PROTECT ROUTES */}
 
-      <Route element={<NotFound />} path="*"></Route>
-
       <Route element={<ChatbotDashboard />} path="/dashboard/chatbot" />
       <Route element={<UserDashBoard />} path="/dashboard/users" />
       <Route element={<ProductDashBoard />} path="/dashboard/products" />
       <Route element={<MainDashBoard />} path="/dashboard/main" />
       <Route element={<OrderDashBoard />} path="/dashboard/orders" />
       <Route element={<PromotionsDashBoard />} path="/dashboard/promotions" />
-      
-      <Route element={<NotFound />} path="/*"></Route>
+
+      <Route element={<NotFound />} path="*"></Route>
     </Routes>
   );
 }
