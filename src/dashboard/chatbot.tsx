@@ -36,6 +36,33 @@ import { MainLayout } from "../dashboard/layouts/main-layout";
 
 
 // ===============================================
+// === TOAST NOTIFICATION COMPONENT ===
+// ===============================================
+const ToastNotification = ({ message, type, onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onClose();
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  const bgColor = type === 'success' ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200';
+  const textColor = type === 'success' ? 'text-emerald-800' : 'text-red-800';
+  const Icon = type === 'success' ? CheckCircle : XCircle;
+  const iconColor = type === 'success' ? 'text-emerald-500' : 'text-red-500';
+
+  return (
+    <div className={`fixed top-4 right-4 z-[120] flex items-center p-4 mb-4 rounded-lg border shadow-lg transform transition-all duration-500 ease-in-out animate-in slide-in-from-top-5 ${bgColor}`}>
+      <Icon className={`w-5 h-5 mr-3 ${iconColor}`} />
+      <div className={`text-sm font-medium ${textColor}`}>{message}</div>
+      <button onClick={onClose} className={`ml-auto -mx-1.5 -my-1.5 rounded-lg p-1.5 inline-flex h-8 w-8 ${textColor} hover:bg-white/50 transition-colors`}>
+        <XIcon className="w-4 h-4" />
+      </button>
+    </div>
+  );
+};
+
+// ===============================================
 // === CẤU HÌNH API ===
 // ===============================================
 const API_BASE_URL = 'https://fearsome-ollie-correspondently.ngrok-free.dev/api/v1/manage';
@@ -71,11 +98,6 @@ function formatTimestamp(isoString) {
   } catch (e) { return ''; }
 }
 
-function getDayAbbreviation(dayName) {
-  if (!dayName) return '';
-  return dayName.substring(0, 3);
-}
-
 function formatDateShort(dateString) {
   if (!dateString) return '';
   try {
@@ -91,11 +113,11 @@ function formatDateShort(dateString) {
 function getFakeData() {
   return {
     stats: {
-      totalConversations: 11,
-      analyzedCount: 2,
-      pendingCount: 9,
-      potentialCount: 1,
-      spamCount: 1,
+      totalConversations: 0,
+      analyzedCount: 0,
+      pendingCount: 0,
+      potentialCount: 0,
+      spamCount: 0,
       dailyStats: []
     },
     conversations: []
@@ -267,8 +289,6 @@ const ConversationsFilterTabs = ({
     </div>
   );
 };
-
-// ... (StatusTag, AnalyzeTag, ConversationsTable, ConversationDetailModal, ConfirmationModal, ErrorBanner remain unchanged)
 
 const StatusTag = ({ status }) => {
   let colors = 'bg-gray-100 text-gray-700', text = 'Undefined';
@@ -518,10 +538,11 @@ const ErrorBanner = ({ message, onClose }) => {
 };
 
 // --- NEW COMPONENT: Advanced Analysis Modal ---
-const AdvancedAnalysisModal = ({ isOpen, onClose }) => {
+const AdvancedAnalysisModal = ({ isOpen, onClose, showNotification }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isSending, setIsSending] = useState(false); // State for sending ads process
 
   useEffect(() => {
     if (isOpen) {
@@ -549,9 +570,30 @@ const AdvancedAnalysisModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleSendAds = (userId) => {
-    alert(`Sending ads to User ID: ${userId}`);
-    // Implement actual API call here later
+  const handleBulkSendAds = async () => {
+    setIsSending(true);
+    try {
+        const response = await fetch(`https://fearsome-ollie-correspondently.ngrok-free.dev/api/v1/mail/send-product-ads`, {
+            method: 'GET',
+            headers: {
+                "ngrok-skip-browser-warning": "true",
+                "Content-Type": "application/json",
+            }
+        });
+
+        if (response.ok) {
+            showNotification("Ads sent successfully to all eligible users!", "success");
+            onClose(); // Optional: close modal on success
+        } else {
+            const errData = await response.json().catch(() => ({}));
+            showNotification(`Failed to send ads: ${errData.message || "Unknown error"}`, "error");
+        }
+    } catch (error) {
+        console.error("Error sending ads:", error);
+        showNotification("Network error occurred while sending ads.", "error");
+    } finally {
+        setIsSending(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -595,7 +637,6 @@ const AdvancedAnalysisModal = ({ isOpen, onClose }) => {
                          <th className="px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Spam</th>
                          <th className="px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Potential</th>
                          <th className="px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Undefined</th>
-                         <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
                       </tr>
                    </thead>
                    <tbody className="bg-white divide-y divide-slate-200">
@@ -611,15 +652,6 @@ const AdvancedAnalysisModal = ({ isOpen, onClose }) => {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-red-600 font-medium">{item.spamCount}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-green-600 font-medium">{item.potentialCount}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-slate-400">{item.undefinedCount}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                               <button 
-                                  onClick={() => handleSendAds(item.userId)}
-                                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
-                               >
-                                  <Send size={12} className="mr-1.5" />
-                                  Send Ads
-                               </button>
-                            </td>
                          </tr>
                       ))}
                    </tbody>
@@ -628,9 +660,18 @@ const AdvancedAnalysisModal = ({ isOpen, onClose }) => {
           )}
         </div>
         
-        <div className="px-6 py-4 bg-white border-t border-gray-100 flex justify-end">
+        <div className="px-6 py-4 bg-white border-t border-gray-100 flex justify-end gap-3">
            <button onClick={onClose} className="px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors">
               Close
+           </button>
+           {/* Single Send Ads Button for the whole batch */}
+           <button 
+              onClick={handleBulkSendAds}
+              disabled={loading || isSending || data.length === 0}
+              className="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+           >
+              {isSending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send size={16} className="mr-2" />}
+              {isSending ? 'Sending...' : 'Send Ads to All'}
            </button>
         </div>
       </div>
@@ -659,6 +700,9 @@ export const ChatbotDashboard = () => {
   // === STATE ADVANCED ANALYSIS ===
   const [isAdvancedAnalysisModalOpen, setIsAdvancedAnalysisModalOpen] = useState(false);
 
+  // === STATE NOTIFICATION ===
+  const [notification, setNotification] = useState(null);
+
   // === STATE CHO PHÂN TRANG ===
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -678,6 +722,11 @@ export const ChatbotDashboard = () => {
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedConversations = allConversations.slice(startIndex, startIndex + itemsPerPage);
+
+  // Helper to show notification
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+  };
 
   // === API CALLS ===
   
@@ -874,6 +923,15 @@ export const ChatbotDashboard = () => {
           </div>
         )}
 
+        {/* --- TOAST NOTIFICATION RENDER --- */}
+        {notification && (
+            <ToastNotification 
+                message={notification.message} 
+                type={notification.type} 
+                onClose={() => setNotification(null)} 
+            />
+        )}
+
         <h1 className="text-3xl font-bold text-gray-900 mb-8 whitespace-nowrap">Manage user conversation</h1>
         {error && showErrorBanner && <ErrorBanner message={error} onClose={() => setShowErrorBanner(false)} />}
 
@@ -894,7 +952,6 @@ export const ChatbotDashboard = () => {
 
           <ConversationsChart dailyStats={overviewData.stats.dailyStats} totalConversations={overviewData.stats.totalConversations} />
           
-          {/* CẬP NHẬT: Truyền props Date Range, Search và Advanced Analysis */}
           <ConversationsFilterTabs 
             currentFilterValue={statusFilter} 
             onFilterChange={setStatusFilter}
@@ -923,8 +980,12 @@ export const ChatbotDashboard = () => {
         <ConversationDetailModal conversation={selectedConversation} onClose={handleCloseModal} />
         <ConfirmationModal isOpen={confirmationState.isOpen} onClose={handleCloseConfirmation} onConfirm={handleConfirmAction} title={confirmationState.title} message={confirmationState.message} type={confirmationState.type} />
         
-        {/* NEW: Advanced Analysis Modal */}
-        <AdvancedAnalysisModal isOpen={isAdvancedAnalysisModalOpen} onClose={() => setIsAdvancedAnalysisModalOpen(false)} />
+        {/* NEW: Advanced Analysis Modal with single Send Ads button and Toast integration */}
+        <AdvancedAnalysisModal 
+            isOpen={isAdvancedAnalysisModalOpen} 
+            onClose={() => setIsAdvancedAnalysisModalOpen(false)} 
+            showNotification={showNotification}
+        />
       </div>
     </MainLayout>
   );
