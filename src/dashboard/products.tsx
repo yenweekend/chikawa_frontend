@@ -1,32 +1,24 @@
-import React, { useState, useEffect } from "react";
-import { 
-  Search, 
-  Plus, 
-  Filter, 
-  Edit, 
-  Package, 
-  Trash2, 
+import {
   AlertTriangle,
-  Copy,
-  Clock,
-  TrendingUp,
-  Layout,
-  Menu, 
-  Bell, 
-  LogOut,
-  X,
-  Save,
-  Image as ImageIcon,
-  Tag,
-  Layers,
-  Smile,
-  Loader2,
+  Check,
   ChevronLeft,
   ChevronRight,
+  Edit,
+  Eye,
   FilterX,
-  Check,
-  Eye
+  Image as ImageIcon,
+  Layers,
+  Loader2,
+  Package,
+  Plus,
+  Save,
+  Search,
+  Smile,
+  Tag,
+  Trash2,
+  X
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { MainLayout } from "../dashboard/layouts/main-layout";
 
 

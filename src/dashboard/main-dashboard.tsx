@@ -1,25 +1,14 @@
-import React, { useState } from "react";
-import { MainLayout } from "./layouts/main-layout"; 
-import { 
-  Layout, 
-  Home, 
-  Users, 
-  Settings, 
-  Menu, 
-  X, 
-  Bell, 
-  LogOut, 
-  ChevronRight, 
-  Search,
-  Plus,
-  ShoppingCart,
+import {
   BarChart2,
-  RefreshCw,
-  Package,
   Clock,
-  TrendingUp,
-  DollarSign
+  Package,
+  Plus,
+  RefreshCw,
+  ShoppingCart,
+  TrendingUp
 } from "lucide-react";
+import { useState } from "react";
+import { MainLayout } from "./layouts/main-layout";
 
 export const MainDashBoard = () => {
   const [timeRange, setTimeRange] = useState('Month');

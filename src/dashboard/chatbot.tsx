@@ -1,44 +1,65 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  MessagesSquare,
-  LineChart,
-  ShoppingCart,
-  Users,
-  Percent,
-  PieChart,
-  CheckCircle2,
-  AlertCircle,
-  XCircle,
-  Clock,
-  Calendar,
-  Search,
-  RefreshCw,
-  BarChart,
-  CheckCircle, 
-  Eye,
-  BarChart2, 
-  Trash2,     
-  X as XIcon, 
   AlertTriangle,
-  Maximize,
   ArrowDownCircle,
+  BarChart,
+  BarChart2,
   Bot,
-  User,
-  ChevronUp,
+  CheckCircle,
+  CheckCircle2,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Info
+  ChevronUp,
+  Clock,
+  Eye,
+  Info,
+  LineChart,
+  Loader2,
+  Maximize,
+  MessagesSquare,
+  RefreshCw,
+  Search,
+  Send,
+  Trash2,
+  User,
+  XCircle,
+  X as XIcon
 } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { MainLayout } from "../dashboard/layouts/main-layout";
 
-// === IMPORT LAYOUT ===
-// Đảm bảo MainLayout đã được tạo ở file src/dashboard/layouts/main-layout.tsx
-import { MainLayout } from "./layouts/main-layout";
+
+// ===============================================
+// === TOAST NOTIFICATION COMPONENT ===
+// ===============================================
+const ToastNotification = ({ message, type, onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onClose();
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  const bgColor = type === 'success' ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200';
+  const textColor = type === 'success' ? 'text-emerald-800' : 'text-red-800';
+  const Icon = type === 'success' ? CheckCircle : XCircle;
+  const iconColor = type === 'success' ? 'text-emerald-500' : 'text-red-500';
+
+  return (
+    <div className={`fixed top-4 right-4 z-[120] flex items-center p-4 mb-4 rounded-lg border shadow-lg transform transition-all duration-500 ease-in-out animate-in slide-in-from-top-5 ${bgColor}`}>
+      <Icon className={`w-5 h-5 mr-3 ${iconColor}`} />
+      <div className={`text-sm font-medium ${textColor}`}>{message}</div>
+      <button onClick={onClose} className={`ml-auto -mx-1.5 -my-1.5 rounded-lg p-1.5 inline-flex h-8 w-8 ${textColor} hover:bg-white/50 transition-colors`}>
+        <XIcon className="w-4 h-4" />
+      </button>
+    </div>
+  );
+};
 
 // ===============================================
 // === CẤU HÌNH API ===
 // ===============================================
-const API_BASE_URL = 'http://localhost:8083/api/v1';
+const API_BASE_URL = 'https://fearsome-ollie-correspondently.ngrok-free.dev/api/v1/manage';
 
 // ===============================================
 // === CÁC HÀM HỖ TRỢ (HELPERS) ===
@@ -71,12 +92,6 @@ function formatTimestamp(isoString) {
   } catch (e) { return ''; }
 }
 
-function getDayAbbreviation(dayName) {
-  if (!dayName) return '';
-  return dayName.substring(0, 3);
-}
-
-// Hàm format ngày ngắn cho trục X của biểu đồ (ví dụ: 12/11)
 function formatDateShort(dateString) {
   if (!dateString) return '';
   try {
@@ -92,48 +107,14 @@ function formatDateShort(dateString) {
 function getFakeData() {
   return {
     stats: {
-      totalConversations: 11,
-      analyzedCount: 2,
-      pendingCount: 9,
-      potentialCount: 1,
-      spamCount: 1,
-      dailyStats: [
-        { date: "2025-11-04", count: 12, dayOfWeek: "Tuesday" },
-        { date: "2025-11-05", count: 19, dayOfWeek: "Wednesday" },
-        { date: "2025-11-06", count: 8, dayOfWeek: "Thursday" },
-        { date: "2025-11-07", count: 25, dayOfWeek: "Friday" },
-        { date: "2025-11-08", count: 15, dayOfWeek: "Saturday" },
-        { date: "2025-11-09", count: 5, dayOfWeek: "Sunday" },
-        { date: "2025-11-10", count: 10, dayOfWeek: "Monday" },
-        { date: "2025-11-11", count: 6, dayOfWeek: "Tuesday" },
-        { date: "2025-11-12", count: 5, dayOfWeek: "Wednesday" },
-        { date: "2025-11-13", count: 18, dayOfWeek: "Thursday" }
-      ]
+      totalConversations: 0,
+      analyzedCount: 0,
+      pendingCount: 0,
+      potentialCount: 0,
+      spamCount: 0,
+      dailyStats: []
     },
-    conversations: [
-      {
-        id: "fake_id_1_analyzed",
-        threadId: "1762830567695",
-        userId: 1,
-        agentType: 1,
-        messages: [
-          { sender: "user", content: "Show me the most popular items", timestamp: "2025-11-11T03:09:35.537+00:00" },
-          { sender: "bot", content: "Here are some of our popular items:\n\n* **Chiikawa Luggage Tag (Momonga)**", timestamp: "2025-11-11T03:09:35.537+00:00" }
-        ],
-        status: 2, analyzed: 2, role: null, createdAt: "2025-11-11T03:09:35.537+00:00"
-      },
-      {
-        id: "fake_id_2_pending",
-        threadId: "1762830567696",
-        userId: null,
-        agentType: 1,
-        messages: [
-          { sender: "user", content: "Hello", timestamp: "2025-11-12T05:10:00.000+00:00" },
-          { sender: "bot", content: "Hi! How can I help you?", timestamp: "2025-11-12T05:10:05.000+00:00" }
-        ],
-        status: 1, analyzed: 1, role: null, createdAt: "2025-11-12T05:10:00.000+00:00"
-      }
-    ]
+    conversations: []
   };
 }
 
@@ -164,13 +145,8 @@ const StatItem = ({ title, value, icon: Icon, color }) => {
 };
 
 const ConversationsChart = ({ dailyStats = [], totalConversations = 0 }) => {
-  // Lấy tối đa 10 phần tử cuối cùng (gần nhất)
   const chartData = dailyStats.slice(-10);
-  
-  // Tìm giá trị lớn nhất để tính chiều cao cột (scale)
-  // Nếu maxCount = 0 (không có data), đặt là 1 để tránh lỗi chia cho 0
   const maxCount = Math.max(...chartData.map(d => d.count), 1); 
-
   const dailyAverage = (dailyStats && dailyStats.length > 0)
     ? (totalConversations / dailyStats.length).toFixed(0) 
     : 0;
@@ -188,32 +164,25 @@ const ConversationsChart = ({ dailyStats = [], totalConversations = 0 }) => {
         </div>
       </div>
 
-      {/* Khu vực vẽ biểu đồ */}
-      {/* Thêm pt-6 để chừa chỗ cho số hiển thị trên cột */}
       <div className="w-full h-64 flex items-end justify-between space-x-2 sm:space-x-4 px-2 pt-6 pb-2">
         {chartData.length === 0 && (
            <div className="w-full h-full flex items-center justify-center text-gray-400">No data available</div>
         )}
         
         {chartData.map((item, index) => {
-          // Tính chiều cao cột theo phần trăm
           const heightPercent = (item.count / maxCount) * 100;
-          // Đảm bảo cột có chiều cao tối thiểu (2%) để hiển thị dải màu nếu có giá trị > 0
           const displayHeight = item.count > 0 ? `${Math.max(heightPercent, 2)}%` : '0px';
           
           return (
             <div key={index} className="flex flex-col items-center justify-end flex-1 h-full group">
-              {/* Số lượng: Hiển thị ngay trên cột bằng Flexbox, không dùng absolute để tránh lệch */}
               <div className="mb-1 text-xs font-bold text-blue-600 text-center w-full">
                 {item.count}
               </div>
               
-              {/* Cột biểu đồ */}
               <div 
                 className="w-full bg-blue-100 rounded-t-md relative hover:bg-blue-200 transition-all duration-300 cursor-pointer"
                 style={{ height: displayHeight }}
               >
-                  {/* Phần màu đậm hơn ở trên cùng cột */}
                   {item.count > 0 && (
                      <div className="absolute top-0 left-0 w-full h-1.5 bg-blue-500 rounded-t-md"></div>
                   )}
@@ -223,7 +192,6 @@ const ConversationsChart = ({ dailyStats = [], totalConversations = 0 }) => {
         })}
       </div>
       
-      {/* Trục hoành (Labels): Tách riêng bên dưới */}
       <div className="border-t border-gray-200 w-full pt-2 flex justify-between space-x-2 sm:space-x-4 px-2">
          {chartData.map((item, index) => (
             <div key={index} className="flex-1 text-center">
@@ -245,7 +213,8 @@ const ConversationsFilterTabs = ({
   endDate, 
   setEndDate, 
   onSearchDate, 
-  onRefresh 
+  onRefresh,
+  onAdvancedAnalysis // New prop
 }) => {
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mt-6">
@@ -257,7 +226,6 @@ const ConversationsFilterTabs = ({
       </div>
 
       <div className="flex flex-wrap items-center gap-4 mb-4">
-        {/* Bộ lọc Status */}
         <div className="flex items-center space-x-2">
           <label htmlFor="statusFilter" className="text-sm font-medium text-gray-700 whitespace-nowrap">Status:</label>
           <select id="statusFilter" className="border border-gray-300 rounded-md p-2 text-sm bg-white" value={currentFilterValue} onChange={(e) => onFilterChange(Number(e.target.value))}>
@@ -270,8 +238,6 @@ const ConversationsFilterTabs = ({
       </div>
 
       <div className="flex flex-wrap items-center gap-4">
-        
-        {/* Date Range Inputs */}
         <div className="flex items-center space-x-2 flex-grow">
             <div className="relative w-full">
                 <input 
@@ -292,7 +258,6 @@ const ConversationsFilterTabs = ({
             </div>
         </div>
 
-        {/* Nút Search */}
         <button 
           onClick={onSearchDate}
           className="flex items-center space-x-2 bg-yellow-400 hover:bg-yellow-500 text-white font-semibold px-4 py-2 rounded-md text-sm"
@@ -308,7 +273,12 @@ const ConversationsFilterTabs = ({
           <RefreshCw size={16} />
           <span>Refresh</span>
         </button>
-        <button className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-md text-sm whitespace-nowrap"><BarChart size={16} /><span>Advanced Analysis</span></button>
+        <button 
+          onClick={onAdvancedAnalysis}
+          className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-md text-sm whitespace-nowrap"
+        >
+          <BarChart size={16} /><span>Advanced Analysis</span>
+        </button>
       </div>
     </div>
   );
@@ -338,9 +308,6 @@ const ConversationsTable = ({
   onPageChange,
   onItemsPerPageChange
 }) => {
-  // Thay đổi: Giảm padding của tiêu đề cột (th) và ô dữ liệu (td)
-  // th: px-6 py-3 -> px-3 py-3
-  // td: px-6 py-4 -> px-3 py-2 (Giảm chiều cao row và chiều rộng padding)
   
   return (
     <div className="bg-white rounded-lg shadow-md mt-6 w-full overflow-hidden">
@@ -564,6 +531,148 @@ const ErrorBanner = ({ message, onClose }) => {
   );
 };
 
+// --- NEW COMPONENT: Advanced Analysis Modal ---
+const AdvancedAnalysisModal = ({ isOpen, onClose, showNotification }) => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [isSending, setIsSending] = useState(false); // State for sending ads process
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchAnalysisData();
+    }
+  }, [isOpen]);
+
+  const fetchAnalysisData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_BASE_URL}/advance-analyst`, {
+         headers: {
+            "ngrok-skip-browser-warning": "true",
+            "Content-Type": "application/json",
+         }
+      });
+      if (!response.ok) throw new Error("Failed to fetch analysis data");
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBulkSendAds = async () => {
+    setIsSending(true);
+    try {
+        const response = await fetch(`https://fearsome-ollie-correspondently.ngrok-free.dev/api/v1/mail/send-product-ads`, {
+            method: 'GET',
+            headers: {
+                "ngrok-skip-browser-warning": "true",
+                "Content-Type": "application/json",
+            }
+        });
+
+        if (response.ok) {
+            showNotification("Ads sent successfully to all eligible users!", "success");
+            onClose(); // Optional: close modal on success
+        } else {
+            const errData = await response.json().catch(() => ({}));
+            showNotification(`Failed to send ads: ${errData.message || "Unknown error"}`, "error");
+        }
+    } catch (error) {
+        console.error("Error sending ads:", error);
+        showNotification("Network error occurred while sending ads.", "error");
+    } finally {
+        setIsSending(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="flex justify-between items-center p-5 border-b border-gray-100 bg-white">
+          <div>
+             <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <BarChart className="text-purple-600" size={24} /> 
+                Advanced Analysis
+             </h2>
+             <p className="text-sm text-slate-500 mt-1">Detailed user activity insights and marketing actions</p>
+          </div>
+          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+             <XIcon size={24} />
+          </button>
+        </div>
+        
+        <div className="p-6 overflow-y-auto bg-slate-50 flex-1">
+          {loading ? (
+             <div className="flex flex-col items-center justify-center h-64 text-slate-500">
+                <Loader2 className="w-10 h-10 animate-spin text-purple-600 mb-3" />
+                <p>Analyzing data...</p>
+             </div>
+          ) : error ? (
+             <div className="p-4 bg-red-50 text-red-600 rounded-lg border border-red-200 text-center">
+                Failed to load data: {error}
+             </div>
+          ) : data.length === 0 ? (
+             <div className="text-center py-12 text-slate-500">No data available for analysis.</div>
+          ) : (
+             <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                <table className="min-w-full divide-y divide-slate-200">
+                   <thead className="bg-slate-50">
+                      <tr>
+                         <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">User ID</th>
+                         <th className="px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Orders</th>
+                         <th className="px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Chats</th>
+                         <th className="px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Spam</th>
+                         <th className="px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Potential</th>
+                         <th className="px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Undefined</th>
+                      </tr>
+                   </thead>
+                   <tbody className="bg-white divide-y divide-slate-200">
+                      {data.map((item) => (
+                         <tr key={item.userId} className="hover:bg-slate-50 transition-colors">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
+                               #{item.userId}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-slate-600">
+                               <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold text-xs">{item.totalOrders}</span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-slate-600">{item.totalConversations}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-red-600 font-medium">{item.spamCount}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-green-600 font-medium">{item.potentialCount}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-slate-400">{item.undefinedCount}</td>
+                         </tr>
+                      ))}
+                   </tbody>
+                </table>
+             </div>
+          )}
+        </div>
+        
+        <div className="px-6 py-4 bg-white border-t border-gray-100 flex justify-end gap-3">
+           <button onClick={onClose} className="px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors">
+              Close
+           </button>
+           {/* Single Send Ads Button for the whole batch */}
+           <button 
+              onClick={handleBulkSendAds}
+              disabled={loading || isSending || data.length === 0}
+              className="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+           >
+              {isSending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send size={16} className="mr-2" />}
+              {isSending ? 'Sending...' : 'Send Ads to All'}
+           </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ===================================================================================
 // MAIN COMPONENT: ChatbotDashboard
 // ===================================================================================
@@ -582,6 +691,12 @@ export const ChatbotDashboard = () => {
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [confirmationState, setConfirmationState] = useState({ isOpen: false, type: null, data: null, title: '', message: '' });
   
+  // === STATE ADVANCED ANALYSIS ===
+  const [isAdvancedAnalysisModalOpen, setIsAdvancedAnalysisModalOpen] = useState(false);
+
+  // === STATE NOTIFICATION ===
+  const [notification, setNotification] = useState(null);
+
   // === STATE CHO PHÂN TRANG ===
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -602,6 +717,11 @@ export const ChatbotDashboard = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedConversations = allConversations.slice(startIndex, startIndex + itemsPerPage);
 
+  // Helper to show notification
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+  };
+
   // === API CALLS ===
   
   // 1. Fetch Overview (Tải toàn bộ ban đầu)
@@ -609,7 +729,15 @@ export const ChatbotDashboard = () => {
     setShowErrorBanner(true); setError(null);
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/overview`, { method: 'GET', mode: 'cors', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } });
+      const response = await fetch(`${API_BASE_URL}/overview`, { 
+        method: 'GET', 
+        mode: 'cors', 
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Accept': 'application/json',
+          "ngrok-skip-browser-warning": "true" 
+        } 
+      });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
       if (data.code === 0 && data.result) { 
@@ -630,7 +758,15 @@ export const ChatbotDashboard = () => {
     if (statusFilter === 0) { if (!isInitialMount.current) await fetchData(); return; }
     console.log(`Filtering by status: ${statusFilter}`); setLoading(true); setError(null);
     try {
-      const response = await fetch(`${API_BASE_URL}/filter-status?status=${statusFilter}`, { method: 'GET', mode: 'cors', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } });
+      const response = await fetch(`${API_BASE_URL}/filter-status?status=${statusFilter}`, { 
+        method: 'GET', 
+        mode: 'cors', 
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Accept': 'application/json',
+          "ngrok-skip-browser-warning": "true" 
+        } 
+      });
       if (!response.ok) throw new Error(`Filter API failed! status: ${response.status}`);
       const filteredConversations = await response.json();
       setOverviewData(prevData => ({ stats: prevData?.stats || getFakeData().stats, conversations: filteredConversations }));
@@ -659,7 +795,11 @@ export const ChatbotDashboard = () => {
       const response = await fetch(`${API_BASE_URL}/by-date?startDate=${startDate}&endDate=${endDate}`, { 
         method: 'GET', 
         mode: 'cors', 
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } 
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Accept': 'application/json',
+          "ngrok-skip-browser-warning": "true" 
+        } 
       });
 
       if (!response.ok) {
@@ -708,11 +848,24 @@ export const ChatbotDashboard = () => {
     try {
       setLoading(true);
       if (type === 'analyze') {
-        const response = await fetch(`${API_BASE_URL}/analyze/${data.id}`, { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'application/json' } });
+        const response = await fetch(`${API_BASE_URL}/analyze/${data.id}`, { 
+          method: 'POST', 
+          mode: 'cors', 
+          headers: { 
+            'Content-Type': 'application/json',
+            "ngrok-skip-browser-warning": "true"
+          } 
+        });
         if (!response.ok) throw new Error(`Analyze API failed! status: ${response.status}`);
         await fetchData();
       } else if (type === 'delete') {
-        const response = await fetch(`${API_BASE_URL}/delete/${data.id}`, { method: 'DELETE', mode: 'cors' });
+        const response = await fetch(`${API_BASE_URL}/delete/${data.id}`, { 
+          method: 'DELETE', 
+          mode: 'cors',
+          headers: { 
+            "ngrok-skip-browser-warning": "true"
+          }
+        });
         if (!response.ok) throw new Error(`Delete API failed! status: ${response.status}`);
         await fetchData();
       }
@@ -764,6 +917,15 @@ export const ChatbotDashboard = () => {
           </div>
         )}
 
+        {/* --- TOAST NOTIFICATION RENDER --- */}
+        {notification && (
+            <ToastNotification 
+                message={notification.message} 
+                type={notification.type} 
+                onClose={() => setNotification(null)} 
+            />
+        )}
+
         <h1 className="text-3xl font-bold text-gray-900 mb-8 whitespace-nowrap">Manage user conversation</h1>
         {error && showErrorBanner && <ErrorBanner message={error} onClose={() => setShowErrorBanner(false)} />}
 
@@ -784,7 +946,6 @@ export const ChatbotDashboard = () => {
 
           <ConversationsChart dailyStats={overviewData.stats.dailyStats} totalConversations={overviewData.stats.totalConversations} />
           
-          {/* CẬP NHẬT: Truyền props Date Range và Search */}
           <ConversationsFilterTabs 
             currentFilterValue={statusFilter} 
             onFilterChange={setStatusFilter}
@@ -794,6 +955,7 @@ export const ChatbotDashboard = () => {
             setEndDate={setEndDate}
             onSearchDate={handleDateSearch}
             onRefresh={handleRefresh} 
+            onAdvancedAnalysis={() => setIsAdvancedAnalysisModalOpen(true)}
           />
           
           <ConversationsTable 
@@ -811,6 +973,13 @@ export const ChatbotDashboard = () => {
 
         <ConversationDetailModal conversation={selectedConversation} onClose={handleCloseModal} />
         <ConfirmationModal isOpen={confirmationState.isOpen} onClose={handleCloseConfirmation} onConfirm={handleConfirmAction} title={confirmationState.title} message={confirmationState.message} type={confirmationState.type} />
+        
+        {/* NEW: Advanced Analysis Modal with single Send Ads button and Toast integration */}
+        <AdvancedAnalysisModal 
+            isOpen={isAdvancedAnalysisModalOpen} 
+            onClose={() => setIsAdvancedAnalysisModalOpen(false)} 
+            showNotification={showNotification}
+        />
       </div>
     </MainLayout>
   );
